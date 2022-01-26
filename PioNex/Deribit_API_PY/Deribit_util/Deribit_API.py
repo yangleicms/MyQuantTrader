@@ -63,12 +63,18 @@ class Deribit_API(object):
             for it in trd:
                 self.on_trade_callback(it)
 
+    def on_rtn_cancel(self,dict):
+        event = dict["result"]
+        if (self.on_order_callback != None):
+            self.on_order_callback(event)
+
+
     def init_func_map(self):
         self.func_map[9929] = self.on_rtn_auth
         self.func_map[2236] = self.on_rtn_pos
         self.func_map[5275] = self.on_rtn_order
         self.func_map[2148] = self.on_rtn_order
-        self.func_map[4214] = self.on_rtn_order
+        self.func_map[4214] = self.on_rtn_cancel
 
     def init(self):
         self.init_func_map()
@@ -116,6 +122,7 @@ class Deribit_API(object):
         self.ws_connection.send(json)
 
     def CancelOrder(self,sysid):
+        print('cancel order:'+ str(sysid))
         json = self.impl.get_cancel_req(sysid)
         self.ws_connection.send(json)
 

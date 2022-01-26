@@ -4,7 +4,7 @@ from Deribit_util.Util import *
 from Deribit_util.DataType import *
 from Deribit_util.utils.timeservice import *
 
-dapi = None
+bapi = None
 
 
 #deribit合约的订单事件回调函数，包括撤单和下单事件回调,见
@@ -19,6 +19,9 @@ https://docs.deribit.com/#private-cancel
 def on_rtn_order_callback(dict):
     print('on_rtn_order_callback rcv order event')
     print(dict)
+    if(dict['order_type']=='limit' and dict['order_state']=='open'):
+        print('order is limit type and is still alive,try cancel it')
+        bapi.CancelOrder(dict['order_id'])
 
 #deribit合约的成交事件回调函数，见
 '''
@@ -38,14 +41,16 @@ def test_order():
     td = TDInputField()
     td.InstrumentID = 'BTC-PERPETUAL'
     td.VolumeTotal = 10#单位为美元
-    td.LocalOrderID = 1024#orderID,唯一
+    td.LocalOrderID = 1025#orderID,唯一
     td.PriceType = PriceType.LIMIT#or PriceType.MARKET
-    td.LimitPrice = 37000
+    td.LimitPrice = 37200
     td.Direct = Direction.LONG
 
     bapi.InputOrder(td)
-    bapi.CancelAllOrder()
 
+#撤销单个order的代码见on_rtn_order_callback
+def test_cancel_all():
+    bapi.CancelAllOrder()
 
 if __name__ == '__main__':
     client_id = "ByTHzEjk"
@@ -53,8 +58,10 @@ if __name__ == '__main__':
 
     bapi = Deribit_API(client_id=client_id, client_secret=client_secret)
     bapi.on_order_callback = on_rtn_order_callback
-    bapi.on_order_callback = on_rtn_order_callback
+    bapi.on_trade_callback = on_rtn_trade_callback
+    #注：websocket断开后，所有未成订单自动撤单
     bapi.init()
+
     test_order()
 
     while True:
