@@ -14,7 +14,7 @@ class TDInputField():
     ExchangeIdx = Exchange.BINANCE
     OptType = OptionType.CALL#只有期权合约 需要
     CurType = Currency.USDT#
-    ProductType =Product.USDT_FUT#默认下单类型为币本位期货
+    ProductType =AssetType.Option#默认下单类型为期权
 
 class TDEventType(Enum):
     TDRtnOrder = 1#订单状态变化
@@ -34,5 +34,6 @@ class TDEvent():
     TradePrice = 0.0
     OrdStatus = OrderStatus.OrderStatus_AllTraded
     UpTime = 0
+    InstrumentID = ''
 
 

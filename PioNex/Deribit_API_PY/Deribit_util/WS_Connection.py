@@ -141,7 +141,7 @@ class WebsocketConnection:
         if not isinstance(message, str):
             print('Decompressing...')
             message = gzip.decompress(message).decode('utf-8')
-        print(message)
+        #print(message)
         json_wrapper = parse_json_from_string(message)
         if self.request.update_callback is not None:
             self.request.update_callback(json_wrapper)

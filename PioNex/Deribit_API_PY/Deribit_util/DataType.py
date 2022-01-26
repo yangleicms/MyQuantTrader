@@ -45,7 +45,7 @@ class OrderStatus(Enum):
     OrderStatus_PartialTraded_PartialCanceled = 11
 
 
-class Product(Enum):
+class AssetType(Enum):
     """
     Product class.
     """
@@ -63,9 +63,7 @@ class Product(Enum):
     WARRANT = 12
     SPREAD = 13
     FUND = 14
-    CUR_CASH = 15#币安现货
-    USDT_FUT = 16#币安u本位期货
-    USD_FUT =17#便币本位期货
+    Option = 15
 
 
 
@@ -176,4 +174,4 @@ class Interval(Enum):
     TICK = "tick"
 
 if __name__ == '__main__':
-    print(Currency.USD)
+    print((Currency.USDT.value))
