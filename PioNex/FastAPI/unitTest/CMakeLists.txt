@@ -5,6 +5,7 @@ FILE(GLOB_RECURSE SOURCE_FILES main.cpp)
   /usr/include/c++/6.1.0 
   /usr/local/include 
   /usr/include
+${PROJECT_SOURCE_DIR}/src
 ${PROJECT_SOURCE_DIR}/lib/libcurl-7.56.0/include
 ${PROJECT_SOURCE_DIR}/lib/mbedtls/include
 ${PROJECT_SOURCE_DIR}/lib/libwebsockets-2.4.0/include

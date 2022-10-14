@@ -30,6 +30,9 @@
     <ClInclude Include="..\src\pionexcpp.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\pionex_util.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\binacpp.cpp">
@@ -42,6 +45,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\src\binacpp_websocket.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pionexcpp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
