@@ -1,6 +1,6 @@
 ﻿#include "pionexcpp.h"
 #include "binacpp_logger.h"
-#include "binacpp_utils.h"
+#include "pionex_util.h"
 #include "decimal.h"
 
 string PionexCPP::m_api_key = "";

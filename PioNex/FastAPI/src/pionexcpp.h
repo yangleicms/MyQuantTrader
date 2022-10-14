@@ -27,6 +27,7 @@
 
 #define PIONEX_HOST "https://exchangedev.bthub.com/tapi"
 using namespace std;
+using namespace pionex_fastAPI;
 
 class PionexCPP 
 {
