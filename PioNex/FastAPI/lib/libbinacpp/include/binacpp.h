@@ -7,6 +7,9 @@
 */
 
 
+#ifndef BINACPP_H
+#define BINACPP_H
+
 
 #include <string.h>
 #include <stdlib.h>
@@ -14,6 +17,7 @@
 #include <stdarg.h>
 
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <map>
 #include <vector>
@@ -33,17 +37,24 @@ class BinaCPP {
 
 	static string api_key;
 	static string secret_key;
+	static CURL* curl;
+
+	
 
 	public:
+
+		
 
 		static void curl_api( string &url, string &result_json );
 		static void curl_api_with_header( string &url, string &result_json , vector <string> &extra_http_header, string &post_data, string &action );
 		static size_t curl_cb( void *content, size_t size, size_t nmemb, string *buffer ) ;
 		
 		static void init( string &api_key, string &secret_key);
+		static void cleanup();
 
 
 		// Public API
+		static void get_exchangeInfo( Json::Value &json_result);
 		static void get_serverTime( Json::Value &json_result); 	
 
 		static void get_allPrices( Json::Value &json_result );
@@ -157,3 +168,4 @@ class BinaCPP {
 };
 
 
+#endif
