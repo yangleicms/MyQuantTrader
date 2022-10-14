@@ -27,6 +27,7 @@
 #include <json/json.h>
 
 
+
 #define BINANCE_HOST "https://api.binance.com"
 
 
@@ -38,7 +39,11 @@ class BinaCPP {
 	static string secret_key;
 	static CURL* curl;
 
+	
+
 	public:
+
+		
 
 		static void curl_api( string &url, string &result_json );
 		static void curl_api_with_header( string &url, string &result_json , vector <string> &extra_http_header, string &post_data, string &action );

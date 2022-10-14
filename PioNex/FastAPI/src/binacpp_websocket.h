@@ -1,3 +1,6 @@
+
+
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -15,11 +18,6 @@
 
 #define BINANCE_WS_HOST "stream.binance.com"
 #define BINANCE_WS_PORT 9443
-
-#define PIONEX_WS_HOST "counter.bthub.com/tapi"
-#define PIONEX_WS_TEST_HOST "counterdev.bthub.com/tapi"
-#define WS_PORT 443
-#define PINGPONG_INTERVAL 10
 
 
 using namespace std;
