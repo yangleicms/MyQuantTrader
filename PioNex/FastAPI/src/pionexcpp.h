@@ -24,6 +24,7 @@
 
 #include <curl/curl.h>
 #include <json/json.h>
+#include "pionex_util.h"
 
 #define PIONEX_HOST "https://exchangedev.bthub.com/tapi"
 using namespace std;
