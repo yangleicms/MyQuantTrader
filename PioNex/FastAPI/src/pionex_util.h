@@ -8,13 +8,13 @@
 #include <vector>
 #include <string.h>
 #include <sys/time.h>
-#include <mbedtls/sha256.h>
-#include <mbedtls/md.h>
+//#include <mbedtls/sha256.h>
+//#include <mbedtls/md.h>
 #include <iostream>
 
 namespace pionex_fastAPI {
 
-	static const std::string base64_chars =
+	/*static const std::string base64_chars =
 		"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 		"abcdefghijklmnopqrstuvwxyz"
 		"0123456789+/";
@@ -100,9 +100,9 @@ namespace pionex_fastAPI {
 		std::string b64 = base64_encode((const char*)digest, 32);
 		std::string urlcode = UrlEncode(b64);
 		return urlcode;
-	}
+	}*/
 
-	static long long get_current_ms_epoch()
+	static long long pionex_get_current_ms_epoch()
 	{
 #ifdef _WIN32
 		time_t clock;

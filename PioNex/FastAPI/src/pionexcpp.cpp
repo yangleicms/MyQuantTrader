@@ -1,10 +1,13 @@
 ﻿#include "pionexcpp.h"
 #include "binacpp_logger.h"
 #include "decimal.h"
-
+#include "binacpp_utils.h"
+#include <iostream>
+#define DEBUG
 string PionexCPP::m_api_key = "";
 string PionexCPP::m_secret_key = "";
 CURL* PionexCPP::m_curl = NULL;
+
 
 void PionexCPP::init(string &api_key, string &secret_key)
 {
@@ -24,6 +27,9 @@ bool PionexCPP::parse_string2json(std::string &str_result, Json::Value &json_res
 {
 	Json::Reader reader;
 	json_result.clear();
+#ifdef DEBUG
+	std::cout<<str_result<<std::endl;
+#endif
 	bool res = reader.parse(str_result, json_result);
 	return res;
 }
@@ -42,7 +48,7 @@ void PionexCPP::send_order(const char *symbol, const char *side,
 	std::string url = "/api/v1/trade/order?";
 	std::string action = "POST";
 
-	std::string tp = std::to_string(get_current_ms_epoch());
+	std::string tp = std::to_string(pionex_get_current_ms_epoch());
 	std::string pre_data = std::string("timestamp=") + tp;
 	url += pre_data;
 	//std::string signature = get_pionex_trding_key(m_secret_key.c_str(), pre_data.c_str());
@@ -77,7 +83,8 @@ void PionexCPP::send_order(const char *symbol, const char *side,
 	
 	string header_SIGNATURE("PIONEX-SIGNATURE: ");
 	string tot_str = action + url + post_data;
-	std::string signature = get_pionex_trding_key(m_secret_key.c_str(), tot_str.c_str());
+	//std::string signature = get_pionex_trding_key(m_secret_key.c_str(), tot_str.c_str());
+	std::string signature = hmac_sha256(m_secret_key.c_str(), tot_str.c_str());
 	header_SIGNATURE.append(signature);
 
 	extra_http_header.push_back(header_chunk);
@@ -85,7 +92,7 @@ void PionexCPP::send_order(const char *symbol, const char *side,
 
 	std::string str_result;
 	tot_url += url;
-	curl_api_with_header(url, str_result, extra_http_header, post_data, action);
+	curl_api_with_header(tot_url, str_result, extra_http_header, post_data, action);
 
 	if (str_result.size() > 0) {
 		try {
@@ -114,7 +121,7 @@ void PionexCPP::cancel_order(const char *symbol,long orderId,Json::Value &json_r
 	url += "/tapi/v1/trade/order?";
 	std::string action = "DELETE";
 
-	std::string tp = std::to_string(get_current_ms_epoch());
+	std::string tp = std::to_string(pionex_get_current_ms_epoch());
 	std::string pre_data = std::string("apiKey=") + m_api_key + std::string("&strategyId=") + std::to_string(strategyId)
 		+ std::string("&timestamp=") + tp;
 	std::string signature = get_pionex_trding_key(m_secret_key.c_str(), pre_data.c_str());
@@ -160,7 +167,7 @@ void PionexCPP::get_order(const char *symbol, long orderId, Json::Value &json_re
 	url += "/tapi/v1/trade/order?";
 	std::string action = "GET";
 
-	std::string tp = std::to_string(get_current_ms_epoch());
+	std::string tp = std::to_string(pionex_get_current_ms_epoch());
 	std::string pre_data = std::string("apiKey=") + m_api_key + std::string("&orderId=") + std::to_string(orderId) + std::string("&symbol=") + (symbol)
 		+std::string("&timestamp=") + tp;
 	std::string signature = get_pionex_trding_key(m_secret_key.c_str(), pre_data.c_str());
@@ -201,7 +208,7 @@ void PionexCPP::get_order(const char *symbol, const char* localOrderId, Json::Va
 	url += "/tapi/v1/trade/localOrder?";
 	std::string action = "GET";
 
-	std::string tp = std::to_string(get_current_ms_epoch());
+	std::string tp = std::to_string(pionex_get_current_ms_epoch());
 	std::string pre_data = std::string("apiKey=") + m_api_key + std::string("&localOrderId=") + (localOrderId)+std::string("&symbol=") + (symbol)
 		+std::string("&timestamp=") + tp;
 	std::string signature = get_pionex_trding_key(m_secret_key.c_str(), pre_data.c_str());
@@ -253,8 +260,8 @@ void PionexCPP::curl_api(string &url, string &result_json) {
 void PionexCPP::curl_api_with_header(string &url, string &str_result, vector <string> &extra_http_header, string &post_data, string &action)
 {
 
-	BinaCPP_logger::write_log("<PionexCPP::curl_api>");
-
+	//BinaCPP_logger::write_log("<PionexCPP::curl_api>");
+	//std::cout<<url<<std::endl;
 	CURLcode res;
 
 	if (PionexCPP::m_curl) {
@@ -263,7 +270,7 @@ void PionexCPP::curl_api_with_header(string &url, string &str_result, vector <st
 		curl_easy_setopt(PionexCPP::m_curl, CURLOPT_WRITEFUNCTION, PionexCPP::curl_cb);
 		curl_easy_setopt(PionexCPP::m_curl, CURLOPT_WRITEDATA, &str_result);
 		curl_easy_setopt(PionexCPP::m_curl, CURLOPT_SSL_VERIFYPEER, false);
-		curl_easy_setopt(PionexCPP::m_curl, CURLOPT_ENCODING, "gzip");
+		//curl_easy_setopt(PionexCPP::m_curl, CURLOPT_ENCODING, "gzip");
 
 		struct curl_slist* headers = NULL;
 		headers = curl_slist_append(headers, "Content-Type:application/json;charset=UTF-8");

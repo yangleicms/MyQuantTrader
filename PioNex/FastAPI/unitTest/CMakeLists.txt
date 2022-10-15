@@ -18,7 +18,7 @@ ${PROJECT_SOURCE_DIR}/lib/jsoncpp-1.8.3/include
  /usr/local/lib
  /usr/lib64
 ${PROJECT_BINARY_DIR}/lib
-${PROJECT_SOURCE_DIR}/lib/libcurl-7.56.0/lib
+${PROJECT_SOURCE_DIR}/lib/third/linux/
 ${PROJECT_SOURCE_DIR}/lib/mbedtls/lib
 ${PROJECT_SOURCE_DIR}/lib/libwebsockets-2.4.0/lib
 ${PROJECT_SOURCE_DIR}/lib/jsoncpp-1.8.3/lib
@@ -34,9 +34,8 @@ TARGET_LINK_LIBRARIES(utest curl)
 TARGET_LINK_LIBRARIES(utest rt)
 TARGET_LINK_LIBRARIES(utest pthread)
 TARGET_LINK_LIBRARIES(utest dl)
-TARGET_LINK_LIBRARIES(utest mbedcrypto)
-TARGET_LINK_LIBRARIES(utest mbedtls)
-TARGET_LINK_LIBRARIES(utest mbedx509)
+TARGET_LINK_LIBRARIES(utest ssl)
+TARGET_LINK_LIBRARIES(utest crypto)
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
