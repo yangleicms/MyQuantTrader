@@ -17,6 +17,7 @@ ${PROJECT_SOURCE_DIR}/lib/jsoncpp-1.8.3/include
  LINK_DIRECTORIES(
  /usr/local/lib
  /usr/lib64
+${PROJECT_BINARY_DIR}/lib
 ${PROJECT_SOURCE_DIR}/lib/libcurl-7.56.0/lib
 ${PROJECT_SOURCE_DIR}/lib/mbedtls/lib
 ${PROJECT_SOURCE_DIR}/lib/libwebsockets-2.4.0/lib

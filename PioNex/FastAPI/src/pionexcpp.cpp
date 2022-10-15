@@ -29,9 +29,8 @@ bool PionexCPP::parse_string2json(std::string &str_result, Json::Value &json_res
 }
 
 void PionexCPP::send_order(const char *symbol, const char *side,
-	const char *orderType, double qty, double price,
-	const char* localOrderId, const char* spending,
-	Json::Value &json_result)
+	const char *type,const char* clientOrderId,double size,
+	double price,double amount,bool IOC,Json::Value &json_result)
 {
 	int sid = 0;
 	if (m_api_key.size() == 0 || m_secret_key.size() == 0) {
@@ -39,44 +38,53 @@ void PionexCPP::send_order(const char *symbol, const char *side,
 		return;
 	}
 
-	std::string url(PIONEX_HOST);
-	url += "/tapi/v1/trade/order?";
+	std::string tot_url(PIONEX_HOST);
+	std::string url = "/api/v1/trade/order?";
 	std::string action = "POST";
 
 	std::string tp = std::to_string(get_current_ms_epoch());
-	std::string pre_data = std::string("apiKey=") + m_api_key + std::string("&strategyId=") + std::to_string(sid)
-		+ std::string("&timestamp=") + tp;
-	std::string signature = get_pionex_trding_key(m_secret_key.c_str(), pre_data.c_str());
-
-	std::string append = std::string("strategyId=") + std::to_string(sid) + std::string("&timestamp=") + tp
-		+ std::string("&apiKey=") + m_api_key + std::string("&signature=") + signature;
-	url += append;
+	std::string pre_data = std::string("timestamp=") + tp;
+	url += pre_data;
+	//std::string signature = get_pionex_trding_key(m_secret_key.c_str(), pre_data.c_str());
 
 	Json::Value jsObj;
 	jsObj["symbol"] = symbol;
 	jsObj["side"] = side;
-	jsObj["orderType"] = orderType;
-	jsObj["strategyId"] = sid;
+	jsObj["type"] = type;
 
-	if (strcmp(orderType, "MARKET") != 0)
+	if (strcmp(type, "MARKET") != 0)
 	{
-		jsObj["qty"] = std::to_string(qty);
+		jsObj["size"] = std::to_string(size);
 		dec::decimal<4> value(price);
 		std::string sValue = dec::toString(value);
 		jsObj["price"] = sValue;
 	}
-	else if (spending != nullptr)
+	else
 	{
-		jsObj["spending"] = spending;//�м۵�Ҫ���ѵı�
+		jsObj["amount"] = amount;
 	}
-	if (localOrderId != nullptr)
+	if (clientOrderId != nullptr)
 	{
-		jsObj["localOrderId"] = localOrderId;
+		jsObj["clientOrderId"] = clientOrderId;
+	}
+	if (IOC) {
+		jsObj["IOC"] = true;
 	}
 	std::string post_data = jsObj.toStyledString();
 	std::vector <std::string> extra_http_header;
-	std::string str_result;
+	string header_chunk("PIONEX-KEY: ");
+	header_chunk.append(m_api_key);
+	
+	string header_SIGNATURE("PIONEX-SIGNATURE: ");
+	string tot_str = action + url + post_data;
+	std::string signature = get_pionex_trding_key(m_secret_key.c_str(), tot_str.c_str());
+	header_SIGNATURE.append(signature);
 
+	extra_http_header.push_back(header_chunk);
+	extra_http_header.push_back(header_SIGNATURE);
+
+	std::string str_result;
+	tot_url += url;
 	curl_api_with_header(url, str_result, extra_http_header, post_data, action);
 
 	if (str_result.size() > 0) {
@@ -256,6 +264,10 @@ void PionexCPP::curl_api_with_header(string &url, string &str_result, vector <st
 		curl_easy_setopt(PionexCPP::m_curl, CURLOPT_WRITEDATA, &str_result);
 		curl_easy_setopt(PionexCPP::m_curl, CURLOPT_SSL_VERIFYPEER, false);
 		curl_easy_setopt(PionexCPP::m_curl, CURLOPT_ENCODING, "gzip");
+
+		struct curl_slist* headers = NULL;
+		headers = curl_slist_append(headers, "Content-Type:application/json;charset=UTF-8");
+		curl_easy_setopt(PionexCPP::m_curl, CURLOPT_HTTPHEADER, headers);
 
 		if (extra_http_header.size() > 0) {
 

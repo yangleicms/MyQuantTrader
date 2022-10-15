@@ -26,7 +26,9 @@
 #include <json/json.h>
 #include "pionex_util.h"
 
-#define PIONEX_HOST "https://exchangedev.bthub.com/tapi"
+#define OLD_PIONEX_HOST "https://exchangedev.bthub.com/tapi"
+#define PIONEX_HOST "https://api.pionex.com"
+
 using namespace std;
 using namespace pionex_fastAPI;
 
@@ -46,17 +48,14 @@ public:
 	static void init(string &api_key, string &secret_key);
 	static void cleanup();
 
-	static void send_order(const char *symbol,const char *side,
-		const char *orderType,double qty, double price,
-		const char* localOrderId, const char* spending,
-		Json::Value &json_result);
+	static void send_order(const char *symbol, const char *side,
+		const char *type, const char* clientOrderId, double size,
+		double price, double amount, bool IOC, Json::Value &json_result);
 
 	static void cancel_order(const char *symbol,long orderId,Json::Value &json_result);
 	static void get_order(const char *symbol, long orderId, Json::Value &json_result);//orderID
 	static void get_order(const char *symbol, const char* localOrderId, Json::Value &json_result);//localID
 	
-	
-
 public:
 	int m_strategy_id = 0;
 };
