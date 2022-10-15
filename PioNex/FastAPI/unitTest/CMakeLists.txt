@@ -28,11 +28,15 @@ ADD_EXECUTABLE(utest ${SOURCE_FILES})
 #依赖的库文件
                     
 #设置编译的库文件存放的目录                    
+TARGET_LINK_LIBRARIES(utest libjsoncpp.a)
+TARGET_LINK_LIBRARIES(utest libFastAPI.a)
+TARGET_LINK_LIBRARIES(utest curl)
 TARGET_LINK_LIBRARIES(utest rt)
 TARGET_LINK_LIBRARIES(utest pthread)
 TARGET_LINK_LIBRARIES(utest dl)
-
-TARGET_LINK_LIBRARIES(utest libFastAPI.a)
+TARGET_LINK_LIBRARIES(utest mbedcrypto)
+TARGET_LINK_LIBRARIES(utest mbedtls)
+TARGET_LINK_LIBRARIES(utest mbedx509)
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 

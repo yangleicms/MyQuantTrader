@@ -23,4 +23,5 @@ else()
 endif()
 
 ADD_SUBDIRECTORY(src)
+ADD_SUBDIRECTORY(lib/jsoncpp-1.8.3/)
 ADD_SUBDIRECTORY(unitTest)
