@@ -193,6 +193,7 @@ void PionexCPP::get_order(const char *symbol, long orderId, Json::Value &json_re
 
 	std::string str_result;
 	std::string post_data = "";
+	tot_url += url;
 	curl_api_with_header(tot_url, str_result, extra_http_header, post_data, action);
 
 	if (str_result.size() > 0) {
@@ -242,7 +243,8 @@ void PionexCPP::get_order(const char *symbol, const char* localOrderId, Json::Va
 
 	std::string str_result;
 	std::string post_data = "";
-	curl_api_with_header(url, str_result, extra_http_header, post_data, action);
+	tot_url += url;
+	curl_api_with_header(tot_url, str_result, extra_http_header, post_data, action);
 
 	if (str_result.size() > 0) {
 
