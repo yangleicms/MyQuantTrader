@@ -60,7 +60,8 @@ void PionexCPP::send_order(const char *symbol, const char *side,
 
 	if (strcmp(type, "MARKET") != 0)
 	{
-		jsObj["size"] = std::to_string(size);
+		dec::decimal<4> qty(size);
+		jsObj["size"] = dec::toString(qty);
 		dec::decimal<4> value(price);
 		std::string sValue = dec::toString(value);
 		jsObj["price"] = sValue;
@@ -110,7 +111,7 @@ void PionexCPP::send_order(const char *symbol, const char *side,
 	BinaCPP_logger::write_log("<PionexCPP::send_order:%s> Done.\n", symbol);
 }
 
-void PionexCPP::cancel_order(const char *symbol,long orderId,Json::Value &json_result)
+void PionexCPP::cancel_order(const char *symbol,uint64_t orderId,Json::Value &json_result)
 {
 	if (m_api_key.size() == 0 || m_secret_key.size() == 0) {
 		BinaCPP_logger::write_log("<PionexCPP::send_order> API Key and Secret Key has not been set.");
@@ -159,10 +160,10 @@ void PionexCPP::cancel_order(const char *symbol,long orderId,Json::Value &json_r
 		BinaCPP_logger::write_log("<PionexCPP::cancel_order> Failed to get anything.");
 	}
 
-	BinaCPP_logger::write_log("<PionexCPP::cancel_order:%d> Done.\n", orderId);
+	BinaCPP_logger::write_log("<PionexCPP::cancel_order:%lld> Done.\n", orderId);
 }
 
-void PionexCPP::get_order(const char *symbol, long orderId, Json::Value &json_result)//orderID
+void PionexCPP::get_order(const char *symbol, uint64_t orderId, Json::Value &json_result)//orderID
 {
 	if (m_api_key.size() == 0 || m_secret_key.size() == 0) {
 		BinaCPP_logger::write_log("<PionexCPP::send_order> API Key and Secret Key has not been set.");
@@ -209,7 +210,7 @@ void PionexCPP::get_order(const char *symbol, long orderId, Json::Value &json_re
 		BinaCPP_logger::write_log("<PionexCPP::get_order> Failed to get anything.");
 	}
 
-	BinaCPP_logger::write_log("<PionexCPP::get_order:%d> Done.\n", orderId);
+	BinaCPP_logger::write_log("<PionexCPP::get_order:%lld> Done.\n", orderId);
 }
 
 void PionexCPP::get_order(const char *symbol, const char* localOrderId, Json::Value &json_result)//localID
