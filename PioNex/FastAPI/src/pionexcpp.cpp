@@ -116,19 +116,14 @@ void PionexCPP::cancel_order(const char *symbol,long orderId,Json::Value &json_r
 		BinaCPP_logger::write_log("<PionexCPP::send_order> API Key and Secret Key has not been set.");
 		return;
 	}
-	int strategyId = 0;
-	std::string url(PIONEX_HOST);
-	url += "/tapi/v1/trade/order?";
+
+	std::string tot_url(PIONEX_HOST);
+	std::string url = "/api/v1/trade/order?";
 	std::string action = "DELETE";
 
 	std::string tp = std::to_string(pionex_get_current_ms_epoch());
-	std::string pre_data = std::string("apiKey=") + m_api_key + std::string("&strategyId=") + std::to_string(strategyId)
-		+ std::string("&timestamp=") + tp;
-	std::string signature = get_pionex_trding_key(m_secret_key.c_str(), pre_data.c_str());
-
-	std::string append = std::string("strategyId=") + std::to_string(strategyId) + std::string("&timestamp=") + tp
-		+ std::string("&apiKey=") + m_api_key + std::string("&signature=") + signature;
-	url += append;
+	std::string pre_data = std::string("timestamp=") + tp;
+	url += pre_data;
 
 	Json::Value jsObj;
 	jsObj["symbol"] = symbol;
@@ -136,9 +131,20 @@ void PionexCPP::cancel_order(const char *symbol,long orderId,Json::Value &json_r
 	std::string post_data = jsObj.toStyledString();
 
 	std::vector <std::string> extra_http_header;
-	//BinaCPP_logger::write_log("<PionexCPP::send_order> url = |%s|, post_data = |%s|", url.c_str(), post_data.c_str());
+	string header_chunk("PIONEX-KEY: ");
+	header_chunk.append(m_api_key);
+
+	string header_SIGNATURE("PIONEX-SIGNATURE: ");
+	string tot_str = action + url + post_data;
+	std::string signature = hmac_sha256(m_secret_key.c_str(), tot_str.c_str());
+	header_SIGNATURE.append(signature);
+
+	extra_http_header.push_back(header_chunk);
+	extra_http_header.push_back(header_SIGNATURE);
+	
 	string str_result;
-	curl_api_with_header(url, str_result, extra_http_header, post_data, action);
+	tot_url += url;
+	curl_api_with_header(tot_url, str_result, extra_http_header, post_data, action);
 
 	if (str_result.size() > 0) {
 
@@ -162,24 +168,32 @@ void PionexCPP::get_order(const char *symbol, long orderId, Json::Value &json_re
 		BinaCPP_logger::write_log("<PionexCPP::send_order> API Key and Secret Key has not been set.");
 		return;
 	}
-	int strategyId = 0;
-	std::string url(PIONEX_HOST);
-	url += "/tapi/v1/trade/order?";
+	
+	std::string tot_url(PIONEX_HOST);
+	std::string url = "/api/v1/trade/order?";
 	std::string action = "GET";
 
 	std::string tp = std::to_string(pionex_get_current_ms_epoch());
-	std::string pre_data = std::string("apiKey=") + m_api_key + std::string("&orderId=") + std::to_string(orderId) + std::string("&symbol=") + (symbol)
+	std::string pre_data = std::string("orderId=") + std::to_string(orderId) + std::string("&symbol=") + (symbol)
 		+std::string("&timestamp=") + tp;
-	std::string signature = get_pionex_trding_key(m_secret_key.c_str(), pre_data.c_str());
 
-	std::string append = std::string("orderId=") + std::to_string(orderId) + std::string("&symbol=") + symbol + std::string("&timestamp=") + tp
-		+ std::string("&apiKey=") + m_api_key + std::string("&signature=") + signature;
-	url += append;
+	url += pre_data;
 
 	std::vector <std::string> extra_http_header;
+	std::string header_chunk("PIONEX-KEY: ");
+	header_chunk.append(m_api_key);
+
+	string header_SIGNATURE("PIONEX-SIGNATURE: ");
+	string tot_str = action + url;
+	std::string signature = hmac_sha256(m_secret_key.c_str(), tot_str.c_str());
+	header_SIGNATURE.append(signature);
+
+	extra_http_header.push_back(header_chunk); 
+	extra_http_header.push_back(header_SIGNATURE);
+
 	std::string str_result;
 	std::string post_data = "";
-	curl_api_with_header(url, str_result, extra_http_header, post_data, action);
+	curl_api_with_header(tot_url, str_result, extra_http_header, post_data, action);
 
 	if (str_result.size() > 0) {
 
@@ -200,24 +214,32 @@ void PionexCPP::get_order(const char *symbol, long orderId, Json::Value &json_re
 void PionexCPP::get_order(const char *symbol, const char* localOrderId, Json::Value &json_result)//localID
 {
 	if (m_api_key.size() == 0 || m_secret_key.size() == 0) {
-		BinaCPP_logger::write_log("<PionexCPP::send_order> API Key and Secret Key has not been set.");
+		BinaCPP_logger::write_log("<PionexCPP::get_order> API Key and Secret Key has not been set.");
 		return;
 	}
-	int strategyId = 0;
-	std::string url(PIONEX_HOST);
-	url += "/tapi/v1/trade/localOrder?";
+
+	std::string tot_url(PIONEX_HOST);
+	std::string url = "/api/v1/trade/orderByClientOrderId?";
 	std::string action = "GET";
 
 	std::string tp = std::to_string(pionex_get_current_ms_epoch());
-	std::string pre_data = std::string("apiKey=") + m_api_key + std::string("&localOrderId=") + (localOrderId)+std::string("&symbol=") + (symbol)
+	std::string pre_data = std::string("clientOrderId=") + (localOrderId)+std::string("&symbol=") + (symbol)
 		+std::string("&timestamp=") + tp;
-	std::string signature = get_pionex_trding_key(m_secret_key.c_str(), pre_data.c_str());
-
-	std::string append = std::string("localOrderId=") + localOrderId + std::string("&symbol=") + symbol + std::string("&timestamp=") + tp
-		+ std::string("&apiKey=") + m_api_key + std::string("&signature=") + signature;
-	url += append;
+	
+	url += pre_data;
 
 	std::vector < std::string> extra_http_header;
+	std::string header_chunk("PIONEX-KEY: ");
+	header_chunk.append(m_api_key);
+
+	string header_SIGNATURE("PIONEX-SIGNATURE: ");
+	string tot_str = action + url;
+	std::string signature = hmac_sha256(m_secret_key.c_str(), tot_str.c_str());
+	header_SIGNATURE.append(signature);
+
+	extra_http_header.push_back(header_chunk);
+	extra_http_header.push_back(header_SIGNATURE);
+
 	std::string str_result;
 	std::string post_data = "";
 	curl_api_with_header(url, str_result, extra_http_header, post_data, action);
@@ -259,7 +281,6 @@ void PionexCPP::curl_api(string &url, string &result_json) {
 // Do the m_curl
 void PionexCPP::curl_api_with_header(string &url, string &str_result, vector <string> &extra_http_header, string &post_data, string &action)
 {
-
 	//BinaCPP_logger::write_log("<PionexCPP::curl_api>");
 	//std::cout<<url<<std::endl;
 	CURLcode res;
