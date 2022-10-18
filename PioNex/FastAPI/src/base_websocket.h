@@ -251,7 +251,10 @@ public:
 	}
 
 	static std::shared_ptr<WebSocketSSLClient> get_cli(int id) {
-		return single_con::get_instance()->m_dat[id];
+		auto it = single_con::get_instance()->m_dat.find(id);
+		if (it != single_con::get_instance()->m_dat.end())
+			return it->second;
+		return nullptr;
 	}
 
 	static std::shared_ptr<WebSocketSSLClient> connect(CB cb, const char* path, std::string port, std::string host,int &id) {

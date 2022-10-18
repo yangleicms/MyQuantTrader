@@ -88,8 +88,8 @@ void PionexCPP::connect_pionex_PubAndPrivate_ws(CB pub,CB pri,int & cli_public_i
 
 void PionexCPP::sub_depth(std::string instrument, int cli_public_index)
 {
-	auto private_cli = Webclient::get_cli(cli_public_index);
-	if (private_cli == nullptr) {
+	auto pub_cli = Webclient::get_cli(cli_public_index);
+	if (pub_cli == nullptr) {
 		std::cout << "can not find WebSocketSSLClient:" << cli_public_index << std::endl;
 		return;
 	}
