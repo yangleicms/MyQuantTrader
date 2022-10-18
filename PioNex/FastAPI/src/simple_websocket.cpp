@@ -123,6 +123,8 @@ void simple_websocket::connect_pionex_public(CB cb)
 	struct lws* conn = lws_client_connect_via_info(&ccinfo);
 	handles[conn] = cb;
 	pionex_pub_conn = conn;
+	if(nullptr == pionex_pub_conn)
+		std::cout<<"nullptr == pionex_pub_conn\n";
 }
 
 void simple_websocket::connect_pionex_private(CB cb, const char* path)
@@ -154,6 +156,8 @@ int simple_websocket::send_pionex_lws_msg(const char* str, int len)
 	char* msg = (char*)&buf[LWS_PRE];
 	sprintf(msg, "%s", str);
 	// 通过WebSocket发送文本消息
+	if(pionex_pub_conn==nullptr)
+		std::cout<<"pionex_pub_conn NULL\n";
 	return lws_write(pionex_pub_conn, &buf[LWS_PRE], len, LWS_WRITE_TEXT);
 }
 

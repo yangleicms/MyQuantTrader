@@ -44,6 +44,7 @@ int on_rtn_depth(Json::Value &jr)
 
 void sub_depth()
 {
+	simple_websocket::init();
 	simple_websocket::connect_pionex_public(on_rtn_depth);
 
 	Json::Value jsObj;
