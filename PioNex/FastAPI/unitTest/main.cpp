@@ -100,18 +100,36 @@ int on_rtn_order_and_fill(Json::Value& jr)
 	return 0;
 }
 
+void connect_pionex_PubAndPrivate_ws(CB pub, CB pri, int& cli_public_index, int& cli_private_index)
+{
+	//connect pionex public ws
+	auto pub_cli = Webclient::connect(pub, "/wsPub", std::to_string(WS_PORT), PIONEX_WS, cli_public_index);
+	//connect pionex private ws
+	std::string path = PionexCPP::get_pionex_private_url();
+	auto pri_cli = Webclient::connect(pri, path.data(), std::to_string(WS_PORT), PIONEX_WS, cli_private_index);
+	//start boost ioc srv
+	Webclient::work();
+}
+
+void work() {
+	connect_pionex_PubAndPrivate_ws(on_rtn_depth, on_rtn_order_and_fill, cli_public_index, cli_private_index);
+}
+
 
 int main(int argc, char* argv[])
 {
 	PionexCPP::init(apiKey, secrertKey);
 	//连接pionex ws服务并启动本地wscli
-	std::thread t1(std::bind(&PionexCPP::connect_pionex_PubAndPrivate_ws,on_rtn_depth,on_rtn_order_and_fill,cli_public_index,cli_private_index));
+	
+	std::thread t1(work);
 	t1.detach();
 	sleep(1);
 	//通过公有留订阅行情
 	//PionexCPP::sub_depth("ETH_USDT", cli_public_index);
 	//通过私有留订阅指定合约的下单和成交回报
 	PionexCPP::sub_order_ws("ETH_USDT",cli_private_index);
+	//不要连续发送，会导致报错
+	sleep(1);
 	PionexCPP::sub_fill_ws("ETH_USDT", cli_private_index);
 	sleep(1);
 	test_trade();
