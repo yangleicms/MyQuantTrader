@@ -20,8 +20,8 @@
 #define BINANCE_WS_PORT 9443
 
 #define WS_PORT 443
-#define PIONEX_PRIVATE_WS "ws.pionex.com/ws"
-#define PIONEX_PUBLIC_WS "ws.pionex.com/wsPub"
+#define PIONEX_PRIVATE_WS "ws.pionex.com"
+#define PIONEX_PUBLIC_WS "ws.pionex.com"
 
 using namespace std;
 typedef int (*CB)(Json::Value &json_value );

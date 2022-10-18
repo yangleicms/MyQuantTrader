@@ -101,15 +101,12 @@ void simple_websocket::connect_endpoint (CB cb,const char *path)
 
 void simple_websocket::connect_pionex_public(CB cb)
 {
-	char ws_path[1024];
-	//strcpy(ws_path, path);
-
 	/* Connect if we are not connected to the server. */
 	struct lws_client_connect_info ccinfo = { 0 };
 	ccinfo.context = single_con::get_instance()->context;
 	ccinfo.address = PIONEX_PUBLIC_WS;
 	ccinfo.port =  WS_PORT;
-	//ccinfo.path = ws_path;
+	ccinfo.path = "/wsPub";
 	ccinfo.host = lws_canonical_hostname(single_con::get_instance()->context);
 	ccinfo.origin = "origin";
 	ccinfo.protocol = protocols[0].name;
