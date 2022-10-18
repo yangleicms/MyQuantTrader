@@ -54,7 +54,7 @@ public:
 			if (len < 10){
 				std::cout << "error rcv len,str:" << data << std::endl;
 			}
-			//std::cout<<data<<std::endl;
+			std::cout<<data<<std::endl;
 
 			Json::CharReaderBuilder b;
 			std::unique_ptr<Json::CharReader> reader(b.newCharReader());

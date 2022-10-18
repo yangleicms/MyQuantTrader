@@ -52,7 +52,6 @@ public:
 
 	static void sub_order_ws(std::string instrument, int cli_private_index);
 	static void sub_fill_ws(std::string instrument, int cli_private_index);
-	static void connect_pionex_PubAndPrivate_ws(CB pub, CB pri, int& cli_public_index, int& cli_private_index);
 	static void sub_depth(std::string instrument, int cli_public_index);
 
 	static void send_order(const char *symbol, const char *side,

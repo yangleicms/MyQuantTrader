@@ -81,7 +81,7 @@ int on_rtn_order_and_fill(Json::Value& jr)
 		std::cout << "orderId:" << jr["data"]["orderId"].asInt64() << std::endl;
 		//order rtn
 		if (topic == "ORDER") {
-			std::cout << "this is a orderRtn event\n" << std::endl;
+			std::cout << "this is a orderRtn event\n";
 			std::cout << "clientOrderId:" << jr["data"]["clientOrderId"].asString() << std::endl;
 			std::cout << "price:" << jr["data"]["price"].asString() << std::endl;
 			std::cout << "size:" << jr["data"]["size"].asString() << std::endl;
@@ -89,7 +89,7 @@ int on_rtn_order_and_fill(Json::Value& jr)
 			std::cout << "status:" << jr["data"]["status"].asString() << std::endl;
 		}
 		else if (topic == "FILL") {
-			std::cout << "this is a FILL event\n" << std::endl;
+			std::cout << "this is a FILL event\n";
 			std::cout << "id:" << jr["data"]["id"].asInt64() << std::endl;
 			std::cout << "role:" << jr["data"]["role"].asString() << std::endl;
 			std::cout << "size:" << jr["data"]["size"].asString() << std::endl;
@@ -100,6 +100,7 @@ int on_rtn_order_and_fill(Json::Value& jr)
 	return 0;
 }
 
+//连接pionex ws服务并启动本地wscli
 void connect_pionex_PubAndPrivate_ws(CB pub, CB pri, int& cli_public_index, int& cli_private_index)
 {
 	//connect pionex public ws
