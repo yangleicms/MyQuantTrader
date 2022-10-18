@@ -24,13 +24,13 @@
     <ClInclude Include="..\src\binacpp_utils.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\binacpp_websocket.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\pionexcpp.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="..\src\pionex_util.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\simple_websocket.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -44,10 +44,10 @@
     <ClCompile Include="..\src\binacpp_utils.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\binacpp_websocket.cpp">
+    <ClCompile Include="..\src\pionexcpp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\pionexcpp.cpp">
+    <ClCompile Include="..\src\simple_websocket.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
