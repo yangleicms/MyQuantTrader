@@ -44,19 +44,9 @@ private:
 	~single_con() {}
 };
 
-const lws_protocols protocols[] =
-{
-	{
-		"example-protocol",
-		simple_websocket::event_cb,
-		0,
-		65536,
-	},
-	{ NULL, NULL, 0, 0 } /* terminator */
-};
-
 class simple_websocket {
 	public:
+		static struct lws_protocols protocols[];
 		static int  event_cb( struct lws *wsi, enum lws_callback_reasons reason, void *user, void *in, size_t len );
 		static void connect_endpoint(CB user_cb,const char* path);
 		static void init();
@@ -65,4 +55,6 @@ class simple_websocket {
 		static int send_pionex_lws_msg(const char* str, int len);
 		static void connect_pionex_public(CB user_cb);
 		static void connect_pionex_private(CB user_cb, const char* path);
+		
 };
+

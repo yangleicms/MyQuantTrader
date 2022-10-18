@@ -1,6 +1,17 @@
 #include "simple_websocket.h"
 #include "binacpp_logger.h"
 
+struct lws_protocols simple_websocket::protocols[] =
+{
+	{
+		"example-protocol",
+		simple_websocket::event_cb,
+		0,
+		65536,
+	},
+	{ NULL, NULL, 0, 0 } /* terminator */
+};
+
 int simple_websocket::event_cb( struct lws *wsi, enum lws_callback_reasons reason, void *user, void *in, size_t len )
 {
 
@@ -123,7 +134,7 @@ void simple_websocket::connect_pionex_private(CB cb, const char* path)
 	ccinfo.address = BINANCE_WS_HOST;
 	ccinfo.port = BINANCE_WS_PORT;
 	ccinfo.path = ws_path;
-	ccinfo.host = lws_canonical_hostname(ingle_con::get_instance()->context);
+	ccinfo.host = lws_canonical_hostname(single_con::get_instance()->context);
 	ccinfo.origin = "origin";
 	ccinfo.protocol = protocols[0].name;
 	ccinfo.ssl_connection = LCCSCF_USE_SSL | LCCSCF_ALLOW_SELFSIGNED | LCCSCF_SKIP_SERVER_CERT_HOSTNAME_CHECK;
