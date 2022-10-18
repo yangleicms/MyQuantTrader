@@ -102,7 +102,7 @@ namespace pionex_fastAPI {
 		return urlcode;
 	}*/
 
-	static long long pionex_get_current_ms_epoch()
+	static uint64_t pionex_get_current_ms_epoch()
 	{
 #ifdef _WIN32
 		time_t clock;
