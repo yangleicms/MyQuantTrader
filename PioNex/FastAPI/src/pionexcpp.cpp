@@ -74,18 +74,6 @@ void PionexCPP::sub_fill_ws(std::string instrument, int cli_private_index)
 	private_cli->Send(str);
 }
 
-//连接pionex ws服务并启动本地wscli
-void PionexCPP::connect_pionex_PubAndPrivate_ws(CB pub,CB pri,int & cli_public_index,int & cli_private_index)
-{
-	//connect pionex public ws
-	auto pub_cli = Webclient::connect(pub, "/wsPub", std::to_string(WS_PORT), PIONEX_WS, cli_public_index);
-	//connect pionex private ws
-	std::string path = PionexCPP::get_pionex_private_url();
-	auto pri_cli = Webclient::connect(pri, path.data(), std::to_string(WS_PORT), PIONEX_WS, cli_private_index);
-	//start boost ioc srv
-	Webclient::work();
-}
-
 void PionexCPP::sub_depth(std::string instrument, int cli_public_index)
 {
 	auto pub_cli = Webclient::get_cli(cli_public_index);
