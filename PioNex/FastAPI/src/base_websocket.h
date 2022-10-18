@@ -143,10 +143,10 @@ static void get_ms_epoch(long long& nowtp, long long& daybegin)
 	daybegin = nowtp - get_dur_from_ubiq_tradingday_begin();
 }
 
-static std::string toString(double val)
+static std::string Pionex_DoubletoString(double val,int prec)
 {
 	std::ostringstream out;
-	out.precision(8);
+	out.precision(prec);
 	out.setf(std::ios_base::fixed);
 	out << val;
 	return out.str();

@@ -8,7 +8,8 @@ std::string old_secrertKey = "He6ME4swjZmyKiijc8u8UmPGSsAktxxhPm9HCSLOHOu2S8yCwT
 std::string apiKey = "3KfwFsVzviMmXGbfZB8Zrb5d31D1McqhhBAjkhutqnK9j3amR2g2zQRcD6vYWUcQvB";
 std::string secrertKey = "I7yBFNDCZKGqmLoAXjCKTzknJAGAya0vf8qrWgAgxGyWRhCe6UOrtNImrvOG30AX";
 
-int cli_index = -1;
+int cli_public_index = -1;
+int cli_private_index = -1;
 
 void test_trade()
 {
@@ -36,44 +37,126 @@ void test_trade()
 
 int on_rtn_depth(Json::Value &jr) 
 {
-	std::string topic = jr["topic"].asString();
-	std::cout << "topic:" << topic << std::endl;
-	if (topic == "DEPTH") {
+	if (false == jr["topic"].empty()) {
+		std::string topic = jr["topic"].asString();
+		std::cout << "topic:" << topic << std::endl;
 		std::cout << jr["symbol"].asString() << std::endl;
-		std::cout << jr["data"]["bids"][0].asString() << std::endl;
-		std::cout << jr["data"]["asks"][0].asString() << std::endl;
+		if (topic == "DEPTH") {
+			std::cout << jr["data"]["bids"][0][0].asString() << std::endl;
+			std::cout << jr["data"]["asks"][0][0].asString() << std::endl;
+		}
+	}
+	else if (false == jr["op"].empty()) {
+		std::string op = jr["op"].asString();
+		if (op == "PING") {
+			auto pub_cli = Webclient::get_cli(cli_public_index);
+			Json::Value jsObj;
+			jsObj["op"] = "PONG";
+			jsObj["timestamp"] = pionex_get_current_ms_epoch();
+			std::string jsonstr = jsObj.toStyledString();
+			pub_cli->Send(jsonstr);
+		}
 	}
 	return 0;
 }
 
-
-
-void connect_pionex_pub()
+int on_rtn_order_and_fill(Json::Value& jr)
 {
-	auto cli = Webclient::connect(on_rtn_depth, "/wsPub", std::to_string(WS_PORT), PIONEX_WS, cli_index);
+	if (false == jr["op"].empty()) {
+		std::string op = jr["op"].asString();
+		if (op == "PING") {
+			auto pri_cli = Webclient::get_cli(cli_private_index);
+			Json::Value jsObj;
+			jsObj["op"] = "PONG";
+			jsObj["timestamp"] = pionex_get_current_ms_epoch();
+			std::string jsonstr = jsObj.toStyledString();
+			pri_cli->Send(jsonstr);
+		}
+	}
+	else if (false == jr["topic"].empty())
+	{
+		std::string topic = jr["topic"].asString();
+		std::cout << "topic:" << topic << std::endl;
+		std::cout << jr["symbol"].asString() << std::endl;
+		std::cout << "orderId:" << jr["data"]["orderId"].asInt64() << std::endl;
+		//order rtn
+		if (topic == "ORDER") {
+			std::cout << "this is a orderRtn event\n" << std::endl;
+			std::cout << "clientOrderId:" << jr["data"]["clientOrderId"].asString() << std::endl;
+			std::cout << "price:" << jr["data"]["price"].asString() << std::endl;
+			std::cout << "size:" << jr["data"]["size"].asString() << std::endl;
+			std::cout << "filledSize:" << jr["data"]["filledSize"].asString() << std::endl;
+			std::cout << "status:" << jr["data"]["status"].asString() << std::endl;
+		}
+		else if (topic == "FILL") {
+			std::cout << "this is a FILL event\n" << std::endl;
+			std::cout << "id:" << jr["data"]["id"].asInt64() << std::endl;
+			std::cout << "role:" << jr["data"]["role"].asString() << std::endl;
+			std::cout << "size:" << jr["data"]["size"].asString() << std::endl;
+			std::cout << "price:" << jr["data"]["price"].asString() << std::endl;
+			std::cout << "side:" << jr["data"]["side"].asString() << std::endl;
+		}
+	}
+}
+
+//连接pionex ws服务并启动本地wscli
+void connect_pionex_PubAndPrivate_ws()
+{
+	//connect pionex public ws
+	auto pub_cli = Webclient::connect(on_rtn_depth, "/wsPub", std::to_string(WS_PORT), PIONEX_WS, cli_public_index);
+	//connect pionex private ws
+	std::string path = PionexCPP::get_pionex_private_url();
+	auto pri_cli = Webclient::connect(on_rtn_order_and_fill, path.data(), std::to_string(WS_PORT), PIONEX_WS, cli_private_index);
+	//start boost ioc srv
 	Webclient::work();
 }
 
+//通过公有留订阅行情
 void sub_depth()
 {
-	std::thread t1(connect_pionex_pub);
-	t1.detach();
-	sleep(1);
-	auto cli = Webclient::get_cli(cli_index);
+	//sub BTC_USDT md
+	auto pub_cli = Webclient::get_cli(cli_public_index);
 	Json::Value jsObj;
 	jsObj["op"] = "SUBSCRIBE";
 	jsObj["topic"] = "DEPTH";
-	jsObj["symbol"] = "BTC_USDT";
+	jsObj["symbol"] = "ETH_USDT";
 	jsObj["limit"] = 5;
 	std::string jsonstr = jsObj.toStyledString();
-	cli->Send(jsonstr);
+	pub_cli->Send(jsonstr);
+
+}
+
+//通过私有留订阅指定合约的下单和成交回报
+void sub_callback() {
+	auto private_cli = Webclient::get_cli(cli_private_index);
+	Json::Value jsObj,fillObj;
+	jsObj["op"] = "SUBSCRIBE";
+	jsObj["topic"] = "ORDER";
+	jsObj["symbol"] = "ETH_USDT";
+	std::string jsonstr = jsObj.toStyledString();
+	private_cli->Send(jsonstr);
+
+	fillObj["op"] = "SUBSCRIBE";
+	fillObj["topic"] = "FILL";
+	fillObj["symbol"] = "ETH_USDT";
+	jsonstr = fillObj.toStyledString();
+	private_cli->Send(jsonstr);
 }
 
 
 int main(int argc, char* argv[])
 {
 	PionexCPP::init(apiKey, secrertKey);
-	sub_depth();
+	//连接pionex ws服务并启动本地wscli
+	std::thread t1(connect_pionex_PubAndPrivate_ws);
+	t1.detach();
+	sleep(1);
+	//通过公有留订阅行情
+	//sub_depth();
+	//通过私有留订阅指定合约的下单和成交回报
+	sub_callback();
+	sleep(1);
+	test_trade();
 
 	while (1) {
 		std::this_thread::sleep_for(std::chrono::seconds(10));

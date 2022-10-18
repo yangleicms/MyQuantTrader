@@ -44,6 +44,7 @@ public:
 	static void curl_api_with_header(string &url, string &result_json, vector <string> &extra_http_header, string &post_data, string &action);
 	static size_t curl_cb(void *content, size_t size, size_t nmemb, string *buffer);
 	static bool parse_string2json(std::string &str_result, Json::Value &json_result);
+	static std::string get_pionex_private_url();
 
 	static void init(string &api_key, string &secret_key);
 	static void cleanup();

@@ -34,6 +34,15 @@ bool PionexCPP::parse_string2json(std::string &str_result, Json::Value &json_res
 	return res;
 }
 
+std::string PionexCPP::get_pionex_private_url() {
+
+	std::string tp = std::to_string(pionex_get_current_ms_epoch());
+	std::string data = "/ws?key=" + m_api_key + "&timestamp=" + tp + "websocket_auth";
+	std::string signature = hmac_sha256(m_secret_key.c_str(), data.c_str());
+	std::string url = "/ws?key=" + m_api_key + "&timestamp=" + tp + "&signature=" + signature;
+	return url;
+}
+
 void PionexCPP::send_order(const char *symbol, const char *side,
 	const char *type,const char* clientOrderId,double size,
 	double price,double amount,bool IOC,Json::Value &json_result)
