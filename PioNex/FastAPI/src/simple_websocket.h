@@ -23,22 +23,39 @@
 #define PIONEX_PRIVATE_WS "ws.pionex.com/ws"
 #define PIONEX_PUBLIC_WS "ws.pionex.com/wsPub"
 
-
 using namespace std;
-
 typedef int (*CB)(Json::Value &json_value );
 
+class single_con
+{
+public:
+	static single_con* get_instance()
+	{
+		static single_con res;
+		return &res;
+	}
+	int i;
+	lws_context* context = nullptr;
+	lws* pionex_pub_conn=nullptr;
+	std::map<lws*, CB> handles;
+
+private:
+	single_con() {}
+	~single_con() {}
+};
+
+const lws_protocols protocols[] =
+{
+	{
+		"example-protocol",
+		simple_websocket::event_cb,
+		0,
+		65536,
+	},
+	{ NULL, NULL, 0, 0 } /* terminator */
+};
 
 class simple_websocket {
-
-
-	static struct lws_context *context;
-	static struct lws_protocols protocols[];
-
-	static struct lws* pionex_pub_conn;
-
-	static map <struct lws *,CB> handles ;
-	
 	public:
 		static int  event_cb( struct lws *wsi, enum lws_callback_reasons reason, void *user, void *in, size_t len );
 		static void connect_endpoint(CB user_cb,const char* path);

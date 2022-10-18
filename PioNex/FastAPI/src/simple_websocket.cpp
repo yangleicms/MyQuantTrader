@@ -1,22 +1,6 @@
 #include "simple_websocket.h"
 #include "binacpp_logger.h"
 
-struct lws_context *simple_websocket::context = NULL;
-struct lws_protocols simple_websocket::protocols[] =
-{
-	{
-		"example-protocol",
-		simple_websocket::event_cb,
-		0,
-		65536,
-	},
-	{ NULL, NULL, 0, 0 } /* terminator */
-};
-
-map <struct lws *,CB> simple_websocket::handles ;
-struct lws* simple_websocket::pionex_pub_conn = nullptr;
-
-//--------------------------
 int simple_websocket::event_cb( struct lws *wsi, enum lws_callback_reasons reason, void *user, void *in, size_t len )
 {
 
@@ -38,8 +22,8 @@ int simple_websocket::event_cb( struct lws *wsi, enum lws_callback_reasons reaso
 				Json::Value json_result;	
 				reader.parse( str_result , json_result );
 
-				if ( handles.find( wsi ) != handles.end() ) {
-					handles[wsi]( json_result );
+				if (single_con::get_instance()->handles.find( wsi ) != single_con::get_instance()->handles.end() ) {
+					single_con::get_instance()->handles[wsi]( json_result );
 				}
 
 			} catch ( exception &e ) {
@@ -54,8 +38,8 @@ int simple_websocket::event_cb( struct lws *wsi, enum lws_callback_reasons reaso
 
 		case LWS_CALLBACK_CLOSED:
 		case LWS_CALLBACK_CLIENT_CONNECTION_ERROR:
-			if ( handles.find( wsi ) != handles.end() ) {
-				handles.erase(wsi);
+			if (single_con::get_instance()->handles.find( wsi ) != single_con::get_instance()->handles.end() ) {
+				single_con::get_instance()->handles.erase(wsi);
 			}
 			break;
 
@@ -78,7 +62,7 @@ void simple_websocket::init( )
 	info.uid = -1;
 	info.options |= LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT;
 
-	context = lws_create_context( &info );
+	single_con::get_instance()->context = lws_create_context( &info );
 }
 
 //----------------------------
@@ -91,17 +75,17 @@ void simple_websocket::connect_endpoint (CB cb,const char *path)
 	
 	/* Connect if we are not connected to the server. */
 	struct lws_client_connect_info ccinfo = {0};
-	ccinfo.context 	= context;
+	ccinfo.context 	= single_con::get_instance()->context;
 	ccinfo.address 	= BINANCE_WS_HOST;
 	ccinfo.port 	= BINANCE_WS_PORT;
 	ccinfo.path 	= ws_path;
-	ccinfo.host 	= lws_canonical_hostname( context );
+	ccinfo.host 	= lws_canonical_hostname(single_con::get_instance()->context );
 	ccinfo.origin 	= "origin";
 	ccinfo.protocol = protocols[0].name;
 	ccinfo.ssl_connection = LCCSCF_USE_SSL | LCCSCF_ALLOW_SELFSIGNED | LCCSCF_SKIP_SERVER_CERT_HOSTNAME_CHECK;
 
 	struct lws* conn = lws_client_connect_via_info(&ccinfo);
-	handles[conn] = cb;
+	single_con::get_instance()->handles[conn] = cb;
 }
 
 void simple_websocket::connect_pionex_public(CB cb)
@@ -111,20 +95,20 @@ void simple_websocket::connect_pionex_public(CB cb)
 
 	/* Connect if we are not connected to the server. */
 	struct lws_client_connect_info ccinfo = { 0 };
-	ccinfo.context = context;
+	ccinfo.context = single_con::get_instance()->context;
 	ccinfo.address = PIONEX_PUBLIC_WS;
 	ccinfo.port =  WS_PORT;
 	//ccinfo.path = ws_path;
-	ccinfo.host = lws_canonical_hostname(context);
+	ccinfo.host = lws_canonical_hostname(single_con::get_instance()->context);
 	ccinfo.origin = "origin";
 	ccinfo.protocol = protocols[0].name;
 	ccinfo.ssl_connection = LCCSCF_USE_SSL | LCCSCF_ALLOW_SELFSIGNED | LCCSCF_SKIP_SERVER_CERT_HOSTNAME_CHECK;
 
 	struct lws* conn = lws_client_connect_via_info(&ccinfo);
-	handles[conn] = cb;
-	pionex_pub_conn = conn;
-	if(nullptr == pionex_pub_conn)
-		std::cout<<"nullptr == pionex_pub_conn\n";
+	single_con::get_instance()->handles[conn] = cb;
+	single_con::get_instance()->pionex_pub_conn = conn;
+	if(nullptr == single_con::get_instance()->pionex_pub_conn)
+		std::cout<<"nullptr == single_con::get_instance()->pionex_pub_conn\n";
 }
 
 void simple_websocket::connect_pionex_private(CB cb, const char* path)
@@ -135,17 +119,17 @@ void simple_websocket::connect_pionex_private(CB cb, const char* path)
 
 	/* Connect if we are not connected to the server. */
 	struct lws_client_connect_info ccinfo = { 0 };
-	ccinfo.context = context;
+	ccinfo.context = single_con::get_instance()->context;
 	ccinfo.address = BINANCE_WS_HOST;
 	ccinfo.port = BINANCE_WS_PORT;
 	ccinfo.path = ws_path;
-	ccinfo.host = lws_canonical_hostname(context);
+	ccinfo.host = lws_canonical_hostname(ingle_con::get_instance()->context);
 	ccinfo.origin = "origin";
 	ccinfo.protocol = protocols[0].name;
 	ccinfo.ssl_connection = LCCSCF_USE_SSL | LCCSCF_ALLOW_SELFSIGNED | LCCSCF_SKIP_SERVER_CERT_HOSTNAME_CHECK;
 
 	struct lws* conn = lws_client_connect_via_info(&ccinfo);
-	handles[conn] = cb;
+	single_con::get_instance()->handles[conn] = cb;
 }
 
 int simple_websocket::send_pionex_lws_msg(const char* str, int len)
@@ -156,9 +140,9 @@ int simple_websocket::send_pionex_lws_msg(const char* str, int len)
 	char* msg = (char*)&buf[LWS_PRE];
 	sprintf(msg, "%s", str);
 	// 通过WebSocket发送文本消息
-	if(pionex_pub_conn==nullptr)
+	if(single_con::get_instance()->pionex_pub_conn==nullptr)
 		std::cout<<"pionex_pub_conn NULL\n";
-	return lws_write(pionex_pub_conn, &buf[LWS_PRE], len, LWS_WRITE_TEXT);
+	return lws_write(single_con::get_instance()->pionex_pub_conn, &buf[LWS_PRE], len, LWS_WRITE_TEXT);
 }
 
 //----------------------------
@@ -168,13 +152,13 @@ void simple_websocket::enter_event_loop()
 	while( 1 )
 	{	
 		try {	
-			lws_service( context, 500 );
+			lws_service(single_con::get_instance()->context, 500 );
 		} catch ( exception &e ) {
 		 	BinaCPP_logger::write_log( "<simple_websocket::enter_event_loop> Error ! %s", e.what() ); 
 		 	break;
 		}
 	}
-	lws_context_destroy( context );
+	lws_context_destroy(single_con::get_instance()->context );
 }
 
 

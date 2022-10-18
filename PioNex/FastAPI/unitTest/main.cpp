@@ -34,9 +34,13 @@ void test_trade()
 
 int on_rtn_depth(Json::Value &jr) 
 {
-	std::cout << jr["symbol"].asString() << std::endl;
-	std::cout << jr["data"]["bids"][0].asString() << std::endl;
-	std::cout << jr["data"]["asks"][0].asString() << std::endl;
+	std::string topic = jr["topic"].asString();
+	std::cout << "topic:" << topic << std::endl;
+	if (topic == "DEPTH") {
+		std::cout << jr["symbol"].asString() << std::endl;
+		std::cout << jr["data"]["bids"][0].asString() << std::endl;
+		std::cout << jr["data"]["asks"][0].asString() << std::endl;
+	}
 	return 0;
 }
 
