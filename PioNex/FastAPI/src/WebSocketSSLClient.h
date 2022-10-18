@@ -234,7 +234,7 @@ protected:
 
 		auto size = buffer_.size();
 		if (size != recv_len) {
-			printf("recv len error:buf:%d,rcv:%d\n",(int)size,(int)recv_len);
+			//printf("recv len error:buf:%d,rcv:%d\n",(int)size,(int)recv_len);
 			return;
 		}
 

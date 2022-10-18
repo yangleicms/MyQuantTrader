@@ -100,62 +100,19 @@ int on_rtn_order_and_fill(Json::Value& jr)
 	return 0;
 }
 
-//连接pionex ws服务并启动本地wscli
-void connect_pionex_PubAndPrivate_ws()
-{
-	//connect pionex public ws
-	auto pub_cli = Webclient::connect(on_rtn_depth, "/wsPub", std::to_string(WS_PORT), PIONEX_WS, cli_public_index);
-	//connect pionex private ws
-	std::string path = PionexCPP::get_pionex_private_url();
-	auto pri_cli = Webclient::connect(on_rtn_order_and_fill, path.data(), std::to_string(WS_PORT), PIONEX_WS, cli_private_index);
-	//start boost ioc srv
-	Webclient::work();
-}
-
-//通过公有留订阅行情
-void sub_depth()
-{
-	//sub BTC_USDT md
-	auto pub_cli = Webclient::get_cli(cli_public_index);
-	Json::Value jsObj;
-	jsObj["op"] = "SUBSCRIBE";
-	jsObj["topic"] = "DEPTH";
-	jsObj["symbol"] = "ETH_USDT";
-	jsObj["limit"] = 5;
-	std::string jsonstr = jsObj.toStyledString();
-	pub_cli->Send(jsonstr);
-
-}
-
-//通过私有留订阅指定合约的下单和成交回报
-void sub_callback() {
-	auto private_cli = Webclient::get_cli(cli_private_index);
-	Json::Value jsObj,fillObj;
-	jsObj["op"] = "SUBSCRIBE";
-	jsObj["topic"] = "ORDER";
-	jsObj["symbol"] = "ETH_USDT";
-	std::string jsonstr = jsObj.toStyledString();
-	private_cli->Send(jsonstr);
-	sleep(1);
-	fillObj["op"] = "SUBSCRIBE";
-	fillObj["topic"] = "FILL";
-	fillObj["symbol"] = "ETH_USDT";
-	std::string str = fillObj.toStyledString();
-	private_cli->Send(str);
-}
-
 
 int main(int argc, char* argv[])
 {
 	PionexCPP::init(apiKey, secrertKey);
 	//连接pionex ws服务并启动本地wscli
-	std::thread t1(connect_pionex_PubAndPrivate_ws);
+	std::thread t1(std::bind(&PionexCPP::connect_pionex_PubAndPrivate_ws,on_rtn_depth,on_rtn_order_and_fill,cli_public_index,cli_private_index));
 	t1.detach();
 	sleep(1);
 	//通过公有留订阅行情
-	//sub_depth();
+	//PionexCPP::sub_depth("ETH_USDT", cli_public_index);
 	//通过私有留订阅指定合约的下单和成交回报
-	sub_callback();
+	PionexCPP::sub_order_ws("ETH_USDT",cli_private_index);
+	PionexCPP::sub_fill_ws("ETH_USDT", cli_private_index);
 	sleep(1);
 	test_trade();
 

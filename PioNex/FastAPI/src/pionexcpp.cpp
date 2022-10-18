@@ -3,6 +3,7 @@
 #include "decimal.h"
 #include "binacpp_utils.h"
 #include <iostream>
+
 #define DEBUG
 string PionexCPP::m_api_key = "";
 string PionexCPP::m_secret_key = "";
@@ -41,6 +42,64 @@ std::string PionexCPP::get_pionex_private_url() {
 	std::string signature = hmac_sha256(m_secret_key.c_str(), data.c_str());
 	std::string url = "/ws?key=" + m_api_key + "&timestamp=" + tp + "&signature=" + signature;
 	return url;
+}
+
+void PionexCPP::sub_order_ws(std::string instrument,int cli_private_index)
+{
+	auto private_cli = Webclient::get_cli(cli_private_index);
+	if (private_cli == nullptr) {
+		std::cout << "can not find WebSocketSSLClient:" << cli_private_index << std::endl;
+		return;
+	}
+	Json::Value jsObj;
+	jsObj["op"] = "SUBSCRIBE";
+	jsObj["topic"] = "ORDER";
+	jsObj["symbol"] = instrument.data();
+	std::string jsonstr = jsObj.toStyledString();
+	private_cli->Send(jsonstr);
+}
+
+void PionexCPP::sub_fill_ws(std::string instrument, int cli_private_index)
+{
+	auto private_cli = Webclient::get_cli(cli_private_index);
+	if (private_cli == nullptr) {
+		std::cout << "can not find WebSocketSSLClient:" << cli_private_index << std::endl;
+		return;
+	}
+	Json::Value fillObj;
+	fillObj["op"] = "SUBSCRIBE";
+	fillObj["topic"] = "FILL";
+	fillObj["symbol"] = instrument.data();
+	std::string str = fillObj.toStyledString();
+	private_cli->Send(str);
+}
+
+//连接pionex ws服务并启动本地wscli
+void PionexCPP::connect_pionex_PubAndPrivate_ws(CB pub,CB pri,int & cli_public_index,int & cli_private_index)
+{
+	//connect pionex public ws
+	auto pub_cli = Webclient::connect(pub, "/wsPub", std::to_string(WS_PORT), PIONEX_WS, cli_public_index);
+	//connect pionex private ws
+	std::string path = PionexCPP::get_pionex_private_url();
+	auto pri_cli = Webclient::connect(pri, path.data(), std::to_string(WS_PORT), PIONEX_WS, cli_private_index);
+	//start boost ioc srv
+	Webclient::work();
+}
+
+void PionexCPP::sub_depth(std::string instrument, int cli_public_index)
+{
+	auto private_cli = Webclient::get_cli(cli_public_index);
+	if (private_cli == nullptr) {
+		std::cout << "can not find WebSocketSSLClient:" << cli_public_index << std::endl;
+		return;
+	}
+	Json::Value jsObj;
+	jsObj["op"] = "SUBSCRIBE";
+	jsObj["topic"] = "DEPTH";
+	jsObj["symbol"] = instrument.data();
+	jsObj["limit"] = 5;
+	std::string jsonstr = jsObj.toStyledString();
+	pub_cli->Send(jsonstr);
 }
 
 void PionexCPP::send_order(const char *symbol, const char *side,
