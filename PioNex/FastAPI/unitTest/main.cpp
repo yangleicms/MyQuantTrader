@@ -97,6 +97,7 @@ int on_rtn_order_and_fill(Json::Value& jr)
 			std::cout << "side:" << jr["data"]["side"].asString() << std::endl;
 		}
 	}
+	return 0;
 }
 
 //连接pionex ws服务并启动本地wscli
@@ -135,12 +136,12 @@ void sub_callback() {
 	jsObj["symbol"] = "ETH_USDT";
 	std::string jsonstr = jsObj.toStyledString();
 	private_cli->Send(jsonstr);
-
+	sleep(1);
 	fillObj["op"] = "SUBSCRIBE";
 	fillObj["topic"] = "FILL";
 	fillObj["symbol"] = "ETH_USDT";
-	jsonstr = fillObj.toStyledString();
-	private_cli->Send(jsonstr);
+	std::string str = fillObj.toStyledString();
+	private_cli->Send(str);
 }
 
 
