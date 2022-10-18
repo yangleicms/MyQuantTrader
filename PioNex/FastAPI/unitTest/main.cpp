@@ -73,15 +73,18 @@ int on_rtn_order_and_fill(Json::Value& jr)
 			pri_cli->Send(jsonstr);
 		}
 	}
+	else if (false == jr["type"].empty()) {
+		return 0;
+	}
 	else if (false == jr["topic"].empty())
 	{
 		std::string topic = jr["topic"].asString();
-		std::cout << "topic:" << topic << std::endl;
-		std::cout << jr["symbol"].asString() << std::endl;
-		std::cout << "orderId:" << jr["data"]["orderId"].asInt64() << std::endl;
 		//order rtn
 		if (topic == "ORDER") {
 			std::cout << "this is a orderRtn event\n";
+			std::cout << "topic:" << topic << std::endl;
+			std::cout << jr["symbol"].asString() << std::endl;
+			std::cout << "orderId:" << jr["data"]["orderId"].asInt64() << std::endl;
 			std::cout << "clientOrderId:" << jr["data"]["clientOrderId"].asString() << std::endl;
 			std::cout << "price:" << jr["data"]["price"].asString() << std::endl;
 			std::cout << "size:" << jr["data"]["size"].asString() << std::endl;
@@ -90,6 +93,9 @@ int on_rtn_order_and_fill(Json::Value& jr)
 		}
 		else if (topic == "FILL") {
 			std::cout << "this is a FILL event\n";
+			std::cout << "topic:" << topic << std::endl;
+			std::cout << jr["symbol"].asString() << std::endl;
+			std::cout << "orderId:" << jr["data"]["orderId"].asInt64() << std::endl;
 			std::cout << "id:" << jr["data"]["id"].asInt64() << std::endl;
 			std::cout << "role:" << jr["data"]["role"].asString() << std::endl;
 			std::cout << "size:" << jr["data"]["size"].asString() << std::endl;
