@@ -2,9 +2,6 @@
 #include "base_websocket.h"
 #include <thread>
 
-std::string old_apiKey = "2711YVKAmg1j5cFjNJa42HPOSZRkhT7QQt5rThkYdOyAEoweo4tyDCAqKlz9OUc6";
-std::string old_secrertKey = "He6ME4swjZmyKiijc8u8UmPGSsAktxxhPm9HCSLOHOu2S8yCwTJsF4gwNN3KrtjE";
-
 std::string apiKey = "3KfwFsVzviMmXGbfZB8Zrb5d31D1McqhhBAjkhutqnK9j3amR2g2zQRcD6vYWUcQvB";
 std::string secrertKey = "I7yBFNDCZKGqmLoAXjCKTzknJAGAya0vf8qrWgAgxGyWRhCe6UOrtNImrvOG30AX";
 
@@ -122,24 +119,58 @@ void work() {
 	connect_pionex_PubAndPrivate_ws(on_rtn_depth, on_rtn_order_and_fill, cli_public_index, cli_private_index);
 }
 
-
-int main(int argc, char* argv[])
+void test_pionex_order()
 {
 	PionexCPP::init(apiKey, secrertKey);
 	//连接pionex ws服务并启动本地wscli
-	
+
 	std::thread t1(work);
 	t1.detach();
-	sleep(1);
+	std::this_thread::sleep_for(std::chrono::seconds(1));
 	//通过公有留订阅行情
 	//PionexCPP::sub_depth("ETH_USDT", cli_public_index);
 	//通过私有留订阅指定合约的下单和成交回报
-	PionexCPP::sub_order_ws("ETH_USDT",cli_private_index);
+	PionexCPP::sub_order_ws("ETH_USDT", cli_private_index);
 	//不要连续发送，会导致报错
-	sleep(1);
+	std::this_thread::sleep_for(std::chrono::seconds(1));
 	PionexCPP::sub_fill_ws("ETH_USDT", cli_private_index);
-	sleep(1);
+	std::this_thread::sleep_for(std::chrono::seconds(1));
 	test_trade();
+}
+
+std::shared_ptr<WebSocketSSLClient> okex_pub;
+
+int on_okex_depth(Json::Value& jr) {
+	return 0;
+}
+
+void okex_work() {
+	okex_pub = Webclient::connect(on_okex_depth, "/ws/v5/public", std::to_string(8443), "ws.okx.com", cli_public_index);
+	Webclient::work();
+}
+
+void test_okex() {
+	std::thread t1(okex_work);
+	t1.detach();
+	std::this_thread::sleep_for(std::chrono::seconds(1));
+
+	Json::Value jsObj,sub,args;
+	sub["channel"] = "tickers";
+	sub["instId"] = "ETH-USDT-SWAP";
+	args.append(sub);
+
+	jsObj["op"] = "subscribe";
+	jsObj["args"] = args;
+
+	std::string jsonstr = jsObj.toStyledString();
+	std::cout << jsonstr << std::endl;
+	okex_pub->Send(jsonstr);
+}
+
+
+int main(int argc, char* argv[])
+{
+	test_okex();
 
 	while (1) {
 		std::this_thread::sleep_for(std::chrono::seconds(10));

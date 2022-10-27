@@ -33,6 +33,12 @@
     <ClInclude Include="..\src\simple_websocket.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\base_websocket.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\WebSocketSSLClient.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\binacpp.cpp">
