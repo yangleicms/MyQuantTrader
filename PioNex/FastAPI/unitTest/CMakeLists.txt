@@ -8,6 +8,7 @@ FILE(GLOB_RECURSE SOURCE_FILES main.cpp)
 ${PROJECT_SOURCE_DIR}/src
 ${PROJECT_SOURCE_DIR}/lib/libcurl-7.56.0/include
 ${PROJECT_SOURCE_DIR}/lib/mbedtls/include
+/home/ubuntu/mm/electronresearch/third/include/mbedtls/
 ${PROJECT_SOURCE_DIR}/lib/libwebsockets-2.4.0/include
 ${PROJECT_SOURCE_DIR}/lib/jsoncpp-1.8.3/include
   
@@ -21,6 +22,7 @@ ${PROJECT_BINARY_DIR}/lib
 ${PROJECT_SOURCE_DIR}/lib/third/linux/
 ${PROJECT_SOURCE_DIR}/lib/mbedtls/lib
 ${PROJECT_SOURCE_DIR}/lib/libwebsockets-2.4.0/lib
+/home/ubuntu/mm/electronresearch/third/lib/linux/
 ${PROJECT_SOURCE_DIR}/lib/jsoncpp-1.8.3/lib
  )
 
@@ -30,7 +32,8 @@ ADD_EXECUTABLE(utest ${SOURCE_FILES})
 #设置编译的库文件存放的目录                    
 TARGET_LINK_LIBRARIES(utest libjsoncpp.a)
 TARGET_LINK_LIBRARIES(utest libFastAPI.a)
-TARGET_LINK_LIBRARIES(utest websockets)
+TARGET_LINK_LIBRARIES(utest libmbedtls.a)
+TARGET_LINK_LIBRARIES(utest libmbedcrypto.a)
 TARGET_LINK_LIBRARIES(utest curl)
 TARGET_LINK_LIBRARIES(utest rt)
 TARGET_LINK_LIBRARIES(utest pthread)

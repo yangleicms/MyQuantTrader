@@ -10,6 +10,7 @@ FILE(GLOB_RECURSE SOURCE_FILES *.cpp)
 /usr/include 
 ${PROJECT_SOURCE_DIR}/lib/libcurl-7.56.0/include
 ${PROJECT_SOURCE_DIR}/lib/mbedtls/include
+/home/ubuntu/mm/electronresearch/third/include/mbedtls
 ${PROJECT_SOURCE_DIR}/lib/libwebsockets-2.4.0/include
 ${PROJECT_SOURCE_DIR}/lib/jsoncpp-1.8.3/include
 )     
