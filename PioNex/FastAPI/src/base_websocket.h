@@ -98,29 +98,6 @@ private:
 	~single_con() {}
 };
 
-
-static std::string string_toupper(const char* cstr)
-{
-	std::string ret;
-	for (int i = 0; i < strlen(cstr); i++) {
-		ret.push_back(toupper(cstr[i]));
-	}
-	return ret;
-}
-
-static std::string b2a_hex(char* byte_arr, int n)
-{
-	const static std::string HexCodes = "0123456789abcdef";
-	std::string HexString;
-	for (int i = 0; i < n; ++i) {
-		unsigned char BinValue = byte_arr[i];
-		HexString += HexCodes[(BinValue >> 4) & 0x0F];
-		HexString += HexCodes[BinValue & 0x0F];
-	}
-
-	return HexString;
-}
-
 static int get_dur_from_ubiq_tradingday_begin()
 {
 	time_t timep;
