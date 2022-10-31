@@ -123,8 +123,8 @@ namespace pionex_fastAPI {
 			reinterpret_cast<const unsigned char*>(data), strlen(data),
 			digest);
 		std::string b64 = base64_encode((const char*)digest, 32);
-		std::string urlcode = UrlEncode(b64);
-		return urlcode;
+		//std::string urlcode = UrlEncode(b64);
+		return b64;
 	}
 
 	static uint64_t pionex_get_current_ms_epoch()
