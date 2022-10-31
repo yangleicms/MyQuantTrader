@@ -24,7 +24,7 @@
 
 #include <curl/curl.h>
 #include <json/json.h>
-#include "pionex_util.h"
+#include "utils.h"
 #include "base_websocket.h"
 
 #define OLD_PIONEX_HOST "https://exchangedev.bthub.com/tapi"

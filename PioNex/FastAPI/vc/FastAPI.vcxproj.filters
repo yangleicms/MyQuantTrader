@@ -21,7 +21,7 @@
     <ClInclude Include="..\src\binacpp_logger.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\binacpp_utils.h">
+    <ClInclude Include="..\src\utils.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="..\src\pionexcpp.h">
@@ -37,6 +37,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="..\src\WebSocketSSLClient.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="okexcpp.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

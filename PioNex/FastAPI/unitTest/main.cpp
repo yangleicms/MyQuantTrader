@@ -1,9 +1,14 @@
 #include "pionexcpp.h"
 #include "base_websocket.h"
+#include "utils.h"
 #include <thread>
 
 std::string apiKey = "3KfwFsVzviMmXGbfZB8Zrb5d31D1McqhhBAjkhutqnK9j3amR2g2zQRcD6vYWUcQvB";
 std::string secrertKey = "I7yBFNDCZKGqmLoAXjCKTzknJAGAya0vf8qrWgAgxGyWRhCe6UOrtNImrvOG30AX";
+
+std::string ok_key = "df165e4b-14c4-48b1-b8a8-e74dbd59d9e1";
+std::string ok_sec = "219023BB201E1827E1196CE174E62FA1";
+std::string ok_pswd = "Asdf1234#";
 
 int cli_public_index = -1;
 int cli_private_index = -1;
@@ -139,6 +144,7 @@ void test_pionex_order()
 }
 
 std::shared_ptr<WebSocketSSLClient> okex_pub;
+std::shared_ptr<WebSocketSSLClient> okex_pri;
 
 int on_okex_depth(Json::Value& jr) {
 	return 0;
@@ -146,10 +152,12 @@ int on_okex_depth(Json::Value& jr) {
 
 void okex_work() {
 	okex_pub = Webclient::connect(on_okex_depth, "/ws/v5/public", std::to_string(8443), "ws.okx.com", cli_public_index);
+	std::this_thread::sleep_for(std::chrono::seconds(1));
+	okex_pri = Webclient::connect(on_okex_depth, "/ws/v5/private", std::to_string(8443), "ws.okx.com", cli_public_index);
 	Webclient::work();
 }
 
-void test_okex() {
+void test_okex_md() {
 	std::thread t1(okex_work);
 	t1.detach();
 	std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -167,10 +175,58 @@ void test_okex() {
 	okex_pub->Send(jsonstr);
 }
 
+void test_okex_private() {
+	std::thread t1(okex_work);
+	t1.detach();
+	std::this_thread::sleep_for(std::chrono::seconds(2));
+
+	std::string tp = std::to_string(get_current_ms_epoch()/1000);
+	std::string strr = tp + "GET/users/self/verify";
+
+	Json::Value jsObj, sub, args;
+	sub["apiKey"] = ok_key.data();
+	sub["passphrase"] = ok_pswd.data();
+	sub["timestamp"] = tp;
+	sub["sign"] = get_okex_sign(ok_sec.data(),strr.data());
+	args.append(sub);
+
+	jsObj["op"] = "login";
+	jsObj["args"] = args;
+	std::string jsonstr = jsObj.toStyledString();
+	std::cout << jsonstr << std::endl;
+	okex_pri->Send(jsonstr);
+
+	std::this_thread::sleep_for(std::chrono::seconds(1));
+	jsObj.clear();
+	sub.clear();
+	args.clear();
+	jsObj["op"] = "subscribe";
+
+	sub["channel"] = "orders";
+	sub["instType"] = "SWAP";
+	sub["instId"] = "BTC-USDT-SWAP";
+	args.append(sub);
+	sub["channel"] = "orders";
+	sub["instType"] = "SPOT";
+	sub["instId"] = "BTC-USDT";
+	args.append(sub);
+
+	jsObj["args"] = args;
+	jsonstr = jsObj.toStyledString();
+	std::cout << jsonstr << std::endl;
+	okex_pri->Send(jsonstr);
+
+	std::this_thread::sleep_for(std::chrono::seconds(1));
+	jsObj.clear();
+	sub.clear();
+	args.clear();
+
+}
+
 
 int main(int argc, char* argv[])
 {
-	test_okex();
+	test_okex_private();
 
 	while (1) {
 		std::this_thread::sleep_for(std::chrono::seconds(10));

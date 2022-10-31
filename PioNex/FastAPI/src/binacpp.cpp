@@ -8,7 +8,7 @@
 */
 #include "binacpp.h"
 #include "binacpp_logger.h"
-#include "binacpp_utils.h"
+#include "utils.h"
 
 string BinaCPP::api_key = "";
 string BinaCPP::secret_key = "";
