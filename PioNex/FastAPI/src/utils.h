@@ -172,6 +172,7 @@ static std::string get_utc_time()
 	char buf[32] = { 0 };
 	sprintf(buf, "%d-%02d-%02dT%02d:%02d:%02d", year, mon, day, hour, min, sec);
 	std::string res = buf;
+	res +=".500Z";
 	return res;
 }
 #endif

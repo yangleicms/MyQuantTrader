@@ -56,7 +56,8 @@ void OkexCPP::get_pos()
 
 	std::string sign_str = tp + "GET" + "/api/v5/account/positions";
 	std::string sign = pionex_fastAPI::get_okex_sign(m_secret_key.data(), sign_str.data());
-	extra_http_header.push_back(sign);
+	key = "OK-ACCESS-SIGN:" + sign;
+	extra_http_header.push_back(key);
 
 	std::string str_result;
 	tot_url += url;
