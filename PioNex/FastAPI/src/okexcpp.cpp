@@ -81,3 +81,50 @@ void OkexCPP::get_pos()
 	
 
 }
+
+void OkexCPP::get_order(Json::Value& json_result, const char* InstrumentID, const char* LocalID, const char* SysID)
+{
+	std::string tot_url(OKEX_HOST);
+	std::string path = std::string("/api/v5/trade/order?instId=") + InstrumentID;
+	std::string action = "GET";
+
+	if (strlen(LocalID) > 0) {
+		path += (std::string("&clOrdId=") + LocalID);
+	}
+	if (strlen(SysID) > 0) {
+		path += (std::string("&ordId=") + SysID);
+	}
+
+	std::vector <std::string> extra_http_header;
+	std::string key = "OK-ACCESS-KEY:" + m_api_key;
+	extra_http_header.push_back(key);
+
+	std::string tp = get_utc_time();
+	key = "OK-ACCESS-TIMESTAMP:" + tp;
+	extra_http_header.push_back(key);
+
+	key = "OK-ACCESS-PASSPHRASE:" + m_pass;
+	extra_http_header.push_back(key);
+
+	std::string sign_str = tp + "GET" + path;
+	std::string sign = get_okex_sign(m_secret_key.data(), sign_str.data());
+	extra_http_header.push_back(sign);
+
+	std::string str_result;
+	tot_url += path;
+	std::string post_data;
+	Json::Value json_result;
+
+	getCurlWithHeader(str_result, tot_url, extra_http_header, post_data, action);
+	if (str_result.size() > 0) {
+		try {
+			okex_parse_json(json_result, str_result);
+		}
+		catch (std::exception& e) {
+
+		}
+	}
+	else {
+
+	}
+}

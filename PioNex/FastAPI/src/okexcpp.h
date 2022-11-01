@@ -53,8 +53,7 @@ public:
 		double price, double amount, bool IOC, Json::Value& json_result) {};
 
 	static void cancel_order(const char* symbol, uint64_t orderId, Json::Value& json_result) {};
-	static void get_order(const char* symbol, uint64_t orderId, Json::Value& json_result) {};//orderID
-	static void get_order(const char* symbol, const char* localOrderId, Json::Value& json_result) {};//localID
+	static void get_order(Json::Value& json_result, const char* InstrumentID, const char* LocalID, const char* SysID);
 
 public:
 	int m_strategy_id = 0;
