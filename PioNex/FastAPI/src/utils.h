@@ -155,7 +155,7 @@ namespace pionex_fastAPI {
 	}
 }
 
-std::string get_utc_time()
+static std::string get_utc_time()
 {
 	struct tm* local;
 	time_t t;
