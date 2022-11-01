@@ -155,4 +155,23 @@ namespace pionex_fastAPI {
 	}
 }
 
+std::string get_utc_time()
+{
+	struct tm* local;
+	time_t t;
+	t = time(NULL);
+	local = gmtime(&t);
+
+	int year = local->tm_year + 1900;
+	int mon = local->tm_mon + 1;
+	int day = local->tm_mday;
+	int hour = local->tm_hour;
+	int min = local->tm_min;
+	int sec = local->tm_sec;
+
+	char buf[32] = { 0 };
+	sprintf(buf, "%d-%02d-%02dT%02d:%02d:%02d", year, mon, day, hour, min, sec);
+	std::string res = buf;
+	return res;
+}
 #endif

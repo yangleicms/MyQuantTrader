@@ -221,6 +221,23 @@ void test_okex_private() {
 	sub.clear();
 	args.clear();
 
+	jsObj["id"] = "1099";
+	jsObj["op"] = "order";
+
+	sub["side"] = "buy";
+	sub["instId"] = "ETH-USDT-SWAP";
+	sub["tdMode"] = "isolated";
+	sub["ordType"] = "limit";
+	sub["sz"] = "0.01";
+	sub["px"] = "1500";
+
+	args.append(sub);
+	jsObj["args"] = args;
+	jsonstr = jsObj.toStyledString();
+	std::cout << jsonstr << std::endl;
+	okex_pri->Send(jsonstr);
+
+
 }
 
 

@@ -149,8 +149,8 @@ void PionexCPP::send_order(const char *symbol, const char *side,
 
 	std::string str_result;
 	tot_url += url;
-	curl_api_with_header(tot_url, str_result, extra_http_header, post_data, action);
-
+	//curl_api_with_header(tot_url, str_result, extra_http_header, post_data, action);
+	getCurlWithHeader(str_result, tot_url, extra_http_header, post_data, action);
 	if (str_result.size() > 0) {
 		try {
 			parse_string2json(str_result, json_result);
@@ -201,8 +201,8 @@ void PionexCPP::cancel_order(const char *symbol,uint64_t orderId,Json::Value &js
 	
 	string str_result;
 	tot_url += url;
-	curl_api_with_header(tot_url, str_result, extra_http_header, post_data, action);
-
+	//curl_api_with_header(tot_url, str_result, extra_http_header, post_data, action);
+	getCurlWithHeader(str_result, tot_url, extra_http_header, post_data, action);
 	if (str_result.size() > 0) {
 
 		try {
