@@ -113,7 +113,6 @@ void OkexCPP::get_order(Json::Value& json_result, const char* InstrumentID, cons
 	std::string str_result;
 	tot_url += path;
 	std::string post_data;
-	Json::Value json_result;
 
 	getCurlWithHeader(str_result, tot_url, extra_http_header, post_data, action);
 	if (str_result.size() > 0) {
