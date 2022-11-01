@@ -42,7 +42,7 @@ class OkexCPP
 
 public:
 	static bool parse_string2json(std::string& str_result, Json::Value& json_result);
-	static void init(string& api_key, string& secret_key);
+	static void init(string& api_key, string& secret_key, string& passwd);
 	static void cleanup();
 	static void get_pos();
 

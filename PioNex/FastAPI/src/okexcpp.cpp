@@ -10,12 +10,13 @@ string OkexCPP::m_secret_key = "";
 CURL* OkexCPP::m_curl = NULL;
 
 
-void OkexCPP::init(string& api_key, string& secret_key)
+void OkexCPP::init(string& api_key, string& secret_key,string & passwd)
 {
 	curl_global_init(CURL_GLOBAL_DEFAULT);
 	OkexCPP::m_curl = curl_easy_init();
 	OkexCPP::m_api_key = api_key;
 	OkexCPP::m_secret_key = secret_key;
+	OkexCPP::m_pass = passwd;
 }
 
 void OkexCPP::cleanup()
