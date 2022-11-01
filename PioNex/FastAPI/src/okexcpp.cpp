@@ -43,8 +43,6 @@ void OkexCPP::get_pos()
 	std::string url = "/api/v5/account/positions";
 	std::string action = "GET";
 
-	std::string tp = get_utc_time();
-
 	std::vector <std::string> extra_http_header;
 	std::string key = "OK-ACCESS-KEY:" + m_api_key;
 	extra_http_header.push_back(key);
