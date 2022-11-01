@@ -43,4 +43,40 @@ void OkexCPP::get_pos()
 
 	std::string tp = get_utc_time();
 
+	std::vector <std::string> extra_http_header;
+	std::string key = "OK-ACCESS-KEY:" + m_api_key;
+	extra_http_header.push_back(key);
+
+	std::string tp = get_utc_time();
+	key = "OK-ACCESS-TIMESTAMP:" + tp;
+	extra_http_header.push_back(key);
+
+	key = "OK-ACCESS-PASSPHRASE:" + m_pass;
+	extra_http_header.push_back(key);
+
+	std::string sign_str = tp + "GET" + "/api/v5/account/positions";
+	std::string sign = pionex_fastAPI::get_okex_sign(m_secret_key.data(), sign_str.data());
+	extra_http_header.push_back(sign);
+
+	std::string str_result;
+	tot_url += url;
+	std::string post_data;
+	Json::Value json_result;
+
+	getCurlWithHeader(str_result, tot_url, extra_http_header, post_data, action);
+	if (str_result.size() > 0) {
+		try {
+			parse_string2json(str_result, json_result);
+		}
+		catch (exception& e) {
+			BinaCPP_logger::write_log("<OkexCPP::get_pos> Error ! %s", e.what());
+		}
+		BinaCPP_logger::write_log("<OkexCPP::get_pos> Done.");
+
+	}
+	else {
+		BinaCPP_logger::write_log("<OkexCPP::get_pos> Failed to get anything.");
+	}
+	
+
 }

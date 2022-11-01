@@ -39,7 +39,7 @@
     <ClInclude Include="..\src\WebSocketSSLClient.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="okexcpp.h">
+    <ClInclude Include="..\src\okexcpp.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -57,6 +57,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\src\simple_websocket.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\okexcpp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

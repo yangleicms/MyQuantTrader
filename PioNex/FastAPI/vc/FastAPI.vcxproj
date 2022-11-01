@@ -76,7 +76,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\lib\jsoncpp-1.8.3\include;..\lib\libcurl-7.56.0\include;..\lib\mbedtls\include;..\lib\libwebsockets-2.4.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\lib\jsoncpp-1.8.3\include;..\lib\libcurl-7.56.0\include;..\lib\mbedtls\include;..\lib\libwebsockets-2.4.0\include;..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -101,7 +101,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\lib\jsoncpp-1.8.3\include;..\lib\libcurl-7.56.0\include;..\lib\mbedtls\include;..\lib\libwebsockets-2.4.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\lib\jsoncpp-1.8.3\include;..\lib\libcurl-7.56.0\include;..\lib\mbedtls\include;..\lib\libwebsockets-2.4.0\include;..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -128,17 +128,18 @@
     <ClInclude Include="..\src\base_websocket.h" />
     <ClInclude Include="..\src\binacpp.h" />
     <ClInclude Include="..\src\binacpp_logger.h" />
+    <ClInclude Include="..\src\okexcpp.h" />
     <ClInclude Include="..\src\utils.h" />
     <ClInclude Include="..\src\simple_websocket.h" />
     <ClInclude Include="..\src\pionexcpp.h" />
     <ClInclude Include="..\src\pionex_util.h" />
     <ClInclude Include="..\src\WebSocketSSLClient.h" />
-    <ClInclude Include="okexcpp.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\binacpp.cpp" />
     <ClCompile Include="..\src\binacpp_logger.cpp" />
     <ClCompile Include="..\src\binacpp_utils.cpp" />
+    <ClCompile Include="..\src\okexcpp.cpp" />
     <ClCompile Include="..\src\simple_websocket.cpp" />
     <ClCompile Include="..\src\pionexcpp.cpp" />
   </ItemGroup>
