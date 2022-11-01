@@ -7,6 +7,7 @@
 #define DEBUG
 string OkexCPP::m_api_key = "";
 string OkexCPP::m_secret_key = "";
+string OkexCPP::m_pass = "";
 CURL* OkexCPP::m_curl = NULL;
 
 
