@@ -108,7 +108,8 @@ void OkexCPP::get_order(Json::Value& json_result, const char* InstrumentID, cons
 
 	std::string sign_str = tp + "GET" + path;
 	std::string sign = pionex_fastAPI::get_okex_sign(m_secret_key.data(), sign_str.data());
-	extra_http_header.push_back(sign);
+	key = "OK-ACCESS-SIGN:" + sign;
+	extra_http_header.push_back(key);
 
 	std::string str_result;
 	tot_url += path;
