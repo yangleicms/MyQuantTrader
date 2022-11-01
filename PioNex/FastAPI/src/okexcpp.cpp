@@ -107,7 +107,7 @@ void OkexCPP::get_order(Json::Value& json_result, const char* InstrumentID, cons
 	extra_http_header.push_back(key);
 
 	std::string sign_str = tp + "GET" + path;
-	std::string sign = get_okex_sign(m_secret_key.data(), sign_str.data());
+	std::string sign = pionex_fastAPI::get_okex_sign(m_secret_key.data(), sign_str.data());
 	extra_http_header.push_back(sign);
 
 	std::string str_result;
@@ -118,7 +118,7 @@ void OkexCPP::get_order(Json::Value& json_result, const char* InstrumentID, cons
 	getCurlWithHeader(str_result, tot_url, extra_http_header, post_data, action);
 	if (str_result.size() > 0) {
 		try {
-			okex_parse_json(json_result, str_result);
+			parse_string2json(str_result,json_result);
 		}
 		catch (std::exception& e) {
 
