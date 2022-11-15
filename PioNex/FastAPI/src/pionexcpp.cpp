@@ -324,11 +324,11 @@ void PionexCPP::get_order(const char *symbol, const char* localOrderId, Json::Va
 void PionexCPP::get_all_pos(Json::Value& json_result)
 {
 	std::string tot_url(PIONEX_HOST);
-	std::string url = "/api/v1/trade/order?";
+	std::string url = "/api/v1/account/balances?";
 	std::string action = "GET";
 
 	std::string tp = std::to_string(pionex_get_current_ms_epoch());
-	std::string pre_data = std::string("&timestamp=") + tp;
+	std::string pre_data = std::string("timestamp=") + tp;
 
 	url += pre_data;
 
