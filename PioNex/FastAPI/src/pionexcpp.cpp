@@ -321,6 +321,49 @@ void PionexCPP::get_order(const char *symbol, const char* localOrderId, Json::Va
 	BinaCPP_logger::write_log("<PionexCPP::get_order:%s> Done.\n", localOrderId);
 }
 
+void PionexCPP::get_all_pos(Json::Value& json_result)
+{
+	std::string tot_url(PIONEX_HOST);
+	std::string url = "/api/v1/trade/order?";
+	std::string action = "GET";
+
+	std::string tp = std::to_string(pionex_get_current_ms_epoch());
+	std::string pre_data = std::string("&timestamp=") + tp;
+
+	url += pre_data;
+
+	std::vector < std::string> extra_http_header;
+	std::string header_chunk("PIONEX-KEY: ");
+	header_chunk.append(m_api_key);
+
+	string header_SIGNATURE("PIONEX-SIGNATURE: ");
+	string tot_str = action + url;
+	std::string signature = hmac_sha256(m_secret_key.c_str(), tot_str.c_str());
+	header_SIGNATURE.append(signature);
+
+	extra_http_header.push_back(header_chunk);
+	extra_http_header.push_back(header_SIGNATURE);
+
+	std::string str_result;
+	std::string post_data = "";
+	tot_url += url;
+	getCurlWithHeader(str_result, tot_url, extra_http_header, post_data, action);
+	if (str_result.size() > 0) {
+
+		try {
+			parse_string2json(str_result, json_result);
+		}
+		catch (exception& e) {
+			BinaCPP_logger::write_log("<PionexCPP::get_all_pos> Error ! %s", e.what());
+		}
+	}
+	else {
+		BinaCPP_logger::write_log("<PionexCPP::get_all_pos> Failed to get anything.");
+	}
+
+	BinaCPP_logger::write_log("<PionexCPP::get_all_pos:%s> Done.\n");
+}
+
 //-----------------
 // Curl's callback
 size_t PionexCPP::curl_cb(void *content, size_t size, size_t nmemb, std::string *buffer)
@@ -384,3 +427,4 @@ void PionexCPP::curl_api_with_header(string &url, string &str_result, vector <st
 	}
 	//BinaCPP_logger::write_log("<PionexCPP::curl_api> done");
 }
+

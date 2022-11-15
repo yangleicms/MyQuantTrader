@@ -61,7 +61,7 @@ public:
 	static void cancel_order(const char *symbol,uint64_t orderId,Json::Value &json_result);
 	static void get_order(const char *symbol,uint64_t orderId, Json::Value &json_result);//orderID
 	static void get_order(const char *symbol, const char* localOrderId, Json::Value &json_result);//localID
-	
+	static void get_all_pos(Json::Value& json_result);
 public:
 	int m_strategy_id = 0;
 };
