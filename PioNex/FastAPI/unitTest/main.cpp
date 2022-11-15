@@ -1,4 +1,5 @@
 #include "pionexcpp.h"
+#include "okexcpp.h"
 #include "base_websocket.h"
 #include "utils.h"
 #include <thread>
@@ -204,11 +205,11 @@ void test_okex_private() {
 
 	sub["channel"] = "orders";
 	sub["instType"] = "SWAP";
-	sub["instId"] = "BTC-USDT-SWAP";
+	sub["instId"] = "MATIC-USDT-SWAP";
 	args.append(sub);
 	sub["channel"] = "orders";
 	sub["instType"] = "SPOT";
-	sub["instId"] = "BTC-USDT";
+	sub["instId"] = "MATIC-USDT";
 	args.append(sub);
 
 	jsObj["args"] = args;
@@ -225,11 +226,12 @@ void test_okex_private() {
 	jsObj["op"] = "order";
 
 	sub["side"] = "buy";
-	sub["instId"] = "ETH-USDT-SWAP";
+	sub["instId"] = "MATIC-USDT-SWAP";
 	sub["tdMode"] = "isolated";
 	sub["ordType"] = "limit";
-	sub["sz"] = "0.01";
-	sub["px"] = "1500";
+	sub["sz"] = "1";
+	sub["px"] = "0.936";
+	sub["clOrdId"] = "33334";
 
 	args.append(sub);
 	jsObj["args"] = args;
@@ -237,14 +239,33 @@ void test_okex_private() {
 	std::cout << jsonstr << std::endl;
 	okex_pri->Send(jsonstr);
 
+	std::this_thread::sleep_for(std::chrono::seconds(1));
+        jsObj.clear();
+        sub.clear();
+        args.clear();
+
+	jsObj["id"] = "1033";
+        jsObj["op"] = "cancel-order";
+
+        sub["instId"] = "MATIC-USDT-SWAP";
+        sub["clOrdId"] = "33334";
+
+	args.append(sub);
+        jsObj["args"] = args;
+        jsonstr = jsObj.toStyledString();
+        std::cout << jsonstr << std::endl;
+        okex_pri->Send(jsonstr);
 
 }
 
 
 int main(int argc, char* argv[])
 {
-	test_okex_private();
-
+	//test_okex_private();
+	OkexCPP::init(ok_key,ok_sec,ok_pswd);
+	OkexCPP::get_pos();
+	//Json::Value res;
+	//OkexCPP::get_order(res,"MATIC-USDT-SWAP","","507602064474812435");
 	while (1) {
 		std::this_thread::sleep_for(std::chrono::seconds(10));
 	}
