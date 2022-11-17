@@ -60,7 +60,8 @@ public:
 		++m_conn_num;
 		printf("OnConnected,id:%d,conn_num:%d\n", id, m_conn_num);
 		if (m_conn_num > 1 && m_OnReconn) {
-			m_OnReconn();
+			std::thread t1(m_OnReconn);
+			t1.detach();
 		}
 	};
 
