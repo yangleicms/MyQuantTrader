@@ -158,112 +158,126 @@ void okex_work() {
 	Webclient::work();
 }
 
-void test_okex_md() {
-	std::thread t1(okex_work);
-	t1.detach();
-	std::this_thread::sleep_for(std::chrono::seconds(1));
+class okex_api 
+{
+public:
+	okex_api() {}
+	~okex_api() {}
 
-	Json::Value jsObj,sub,args;
-	sub["channel"] = "tickers";
-	sub["instId"] = "ETH-USDT-SWAP";
-	args.append(sub);
+	void test_okex_md() {
+		std::thread t1(okex_work);
+		t1.detach();
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 
-	jsObj["op"] = "subscribe";
-	jsObj["args"] = args;
+		Json::Value jsObj, sub, args;
+		sub["channel"] = "tickers";
+		sub["instId"] = "ETH-USDT-SWAP";
+		args.append(sub);
 
-	std::string jsonstr = jsObj.toStyledString();
-	std::cout << jsonstr << std::endl;
-	okex_pub->Send(jsonstr);
-}
+		jsObj["op"] = "subscribe";
+		jsObj["args"] = args;
 
-void test_okex_private() {
-	std::thread t1(okex_work);
-	t1.detach();
-	std::this_thread::sleep_for(std::chrono::seconds(2));
+		std::string jsonstr = jsObj.toStyledString();
+		std::cout << jsonstr << std::endl;
+		okex_pub->Send(jsonstr);
+	}
 
-	std::string tp = std::to_string(get_current_ms_epoch()/1000);
-	std::string strr = tp + "GET/users/self/verify";
+	void on_reconn() {
+		std::cout << "OKEX private ws Reconn\n";
+	}
 
-	Json::Value jsObj, sub, args;
-	sub["apiKey"] = ok_key.data();
-	sub["passphrase"] = ok_pswd.data();
-	sub["timestamp"] = tp;
-	sub["sign"] = get_okex_sign(ok_sec.data(),strr.data());
-	args.append(sub);
+	void test_okex_private() {
+		std::thread t1(okex_work);
+		t1.detach();
+		std::this_thread::sleep_for(std::chrono::seconds(2));
 
-	jsObj["op"] = "login";
-	jsObj["args"] = args;
-	std::string jsonstr = jsObj.toStyledString();
-	std::cout << jsonstr << std::endl;
-	okex_pri->Send(jsonstr);
+		return;
 
-	std::this_thread::sleep_for(std::chrono::seconds(1));
-	jsObj.clear();
-	sub.clear();
-	args.clear();
-	jsObj["op"] = "subscribe";
+		std::string tp = std::to_string(get_current_ms_epoch() / 1000);
+		std::string strr = tp + "GET/users/self/verify";
 
-	sub["channel"] = "orders";
-	sub["instType"] = "SWAP";
-	sub["instId"] = "MATIC-USDT-SWAP";
-	args.append(sub);
-	sub["channel"] = "orders";
-	sub["instType"] = "SPOT";
-	sub["instId"] = "MATIC-USDT";
-	args.append(sub);
+		Json::Value jsObj, sub, args;
+		sub["apiKey"] = ok_key.data();
+		sub["passphrase"] = ok_pswd.data();
+		sub["timestamp"] = tp;
+		sub["sign"] = get_okex_sign(ok_sec.data(), strr.data());
+		args.append(sub);
 
-	jsObj["args"] = args;
-	jsonstr = jsObj.toStyledString();
-	std::cout << jsonstr << std::endl;
-	okex_pri->Send(jsonstr);
+		jsObj["op"] = "login";
+		jsObj["args"] = args;
+		std::string jsonstr = jsObj.toStyledString();
+		std::cout << jsonstr << std::endl;
+		okex_pri->Send(jsonstr);
 
-	std::this_thread::sleep_for(std::chrono::seconds(1));
-	jsObj.clear();
-	sub.clear();
-	args.clear();
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+		jsObj.clear();
+		sub.clear();
+		args.clear();
+		jsObj["op"] = "subscribe";
 
-	jsObj["id"] = "1099";
-	jsObj["op"] = "order";
+		sub["channel"] = "orders";
+		sub["instType"] = "SWAP";
+		sub["instId"] = "MATIC-USDT-SWAP";
+		args.append(sub);
+		sub["channel"] = "orders";
+		sub["instType"] = "SPOT";
+		sub["instId"] = "MATIC-USDT";
+		args.append(sub);
 
-	sub["side"] = "buy";
-	sub["instId"] = "MATIC-USDT-SWAP";
-	sub["tdMode"] = "isolated";
-	sub["ordType"] = "limit";
-	sub["sz"] = "1";
-	sub["px"] = "0.936";
-	sub["clOrdId"] = "33334";
+		jsObj["args"] = args;
+		jsonstr = jsObj.toStyledString();
+		std::cout << jsonstr << std::endl;
+		okex_pri->Send(jsonstr);
 
-	args.append(sub);
-	jsObj["args"] = args;
-	jsonstr = jsObj.toStyledString();
-	std::cout << jsonstr << std::endl;
-	okex_pri->Send(jsonstr);
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+		jsObj.clear();
+		sub.clear();
+		args.clear();
 
-	std::this_thread::sleep_for(std::chrono::seconds(1));
-        jsObj.clear();
-        sub.clear();
-        args.clear();
+		jsObj["id"] = "1099";
+		jsObj["op"] = "order";
 
-	jsObj["id"] = "1033";
-        jsObj["op"] = "cancel-order";
+		sub["side"] = "buy";
+		sub["instId"] = "MATIC-USDT-SWAP";
+		sub["tdMode"] = "isolated";
+		sub["ordType"] = "limit";
+		sub["sz"] = "1";
+		sub["px"] = "0.936";
+		sub["clOrdId"] = "33334";
 
-        sub["instId"] = "MATIC-USDT-SWAP";
-        sub["clOrdId"] = "33334";
+		args.append(sub);
+		jsObj["args"] = args;
+		jsonstr = jsObj.toStyledString();
+		std::cout << jsonstr << std::endl;
+		okex_pri->Send(jsonstr);
 
-	args.append(sub);
-        jsObj["args"] = args;
-        jsonstr = jsObj.toStyledString();
-        std::cout << jsonstr << std::endl;
-        okex_pri->Send(jsonstr);
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+		jsObj.clear();
+		sub.clear();
+		args.clear();
 
-}
+		jsObj["id"] = "1033";
+		jsObj["op"] = "cancel-order";
 
+		sub["instId"] = "MATIC-USDT-SWAP";
+		sub["clOrdId"] = "33334";
+
+		args.append(sub);
+		jsObj["args"] = args;
+		jsonstr = jsObj.toStyledString();
+		std::cout << jsonstr << std::endl;
+		okex_pri->Send(jsonstr);
+
+	}
+};
 
 int main(int argc, char* argv[])
 {
+	okex_api api;
+	api.test_okex_private();
 	//test_okex_private();
-	OkexCPP::init(ok_key,ok_sec,ok_pswd);
-	OkexCPP::get_pos();
+	//OkexCPP::init(ok_key,ok_sec,ok_pswd);
+	//OkexCPP::get_pos();
 	//Json::Value res;
 	//OkexCPP::get_order(res,"MATIC-USDT-SWAP","","507602064474812435");
 	while (1) {

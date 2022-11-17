@@ -57,7 +57,11 @@ class WSClient :public WebSocketClientApi
 {
 public:
 	virtual void OnConnected(int id) {
-		printf("OnConnected,id:%d\n", id);
+		++m_conn_num;
+		printf("OnConnected,id:%d,conn_num:%d\n", id, m_conn_num);
+		if (m_conn_num > 1 && m_OnReconn) {
+			m_OnReconn();
+		}
 	};
 
 	virtual void OnClosed(std::string uri) {
@@ -105,6 +109,8 @@ public:
 		return"";
 	}
 	CB cb;
+	int m_conn_num = 0;
+	std::function<void()> m_OnReconn;
 };
 
 static int get_dur_from_ubiq_tradingday_begin()
@@ -243,12 +249,15 @@ public:
 		return nullptr;
 	}
 
-	static std::shared_ptr<WebSocketSSLClient> connect(CB cb, const char* path, std::string port, std::string host,int &id) {
+	static std::shared_ptr<WebSocketSSLClient> connect(CB cb, const char* path, std::string port, std::string host,int &id, std::function<void()> rc = nullptr) {
 
 		id = ++(single_con::get_instance()->m_index);
 		WebSocketClientApi* api = new WSClient();
 		WSClient* rap = static_cast<WSClient*>(api);
 		rap->cb = cb;
+		if (rc) {
+			rap->m_OnReconn = rc;
+		}
 
 		std::shared_ptr<WebSocketSSLClient> cli =
 			std::make_shared<WebSocketSSLClient>(id, single_con::get_instance()->m_ioc, host, port, api);
