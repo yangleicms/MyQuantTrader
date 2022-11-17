@@ -65,7 +65,7 @@ public:
 		printf("%s\n", msg.data());
 		
 	}
-	virtual void OnReconnect(std::string& msg) {
+	virtual void OnReconnect(std::string msg) {
 		printf("%s\n", msg.data());
 	}
 
