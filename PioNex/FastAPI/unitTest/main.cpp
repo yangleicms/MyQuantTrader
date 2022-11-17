@@ -151,12 +151,7 @@ int on_okex_depth(Json::Value& jr) {
 	return 0;
 }
 
-void okex_work() {
-	okex_pub = Webclient::connect(on_okex_depth, "/ws/v5/public", std::to_string(8443), "ws.okx.com", cli_public_index);
-	std::this_thread::sleep_for(std::chrono::seconds(1));
-	okex_pri = Webclient::connect(on_okex_depth, "/ws/v5/private", std::to_string(8443), "ws.okx.com", cli_public_index);
-	Webclient::work();
-}
+
 
 class okex_api 
 {
@@ -164,8 +159,16 @@ public:
 	okex_api() {}
 	~okex_api() {}
 
+	void okex_work() {
+		okex_pub = Webclient::connect(on_okex_depth, "/ws/v5/public", std::to_string(8443), "ws.okx.com", cli_public_index);
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+		okex_pri = Webclient::connect(on_okex_depth, "/ws/v5/private", std::to_string(8443),
+			"ws.okx.com", cli_public_index,std::bind(&okex_api::on_reconn,this));
+		Webclient::work();
+	}
+
 	void test_okex_md() {
-		std::thread t1(okex_work);
+		std::thread t1(std::bind(&okex_api::okex_work,this));
 		t1.detach();
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 
@@ -187,7 +190,7 @@ public:
 	}
 
 	void test_okex_private() {
-		std::thread t1(okex_work);
+		std::thread t1(std::bind(&okex_api::okex_work, this));
 		t1.detach();
 		std::this_thread::sleep_for(std::chrono::seconds(2));
 
