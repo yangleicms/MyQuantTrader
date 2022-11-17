@@ -22,6 +22,8 @@ class WebSocketClientApi
 {
 public:
 	virtual void OnConnected(int id) = 0;
+	virtual void OnClosed(std::string uri) = 0;
+	virtual void OnReconnect(std::string uri) = 0;
 
 	virtual bool OnSubscribed(char* data, size_t len) {
 		return true;
@@ -45,7 +47,7 @@ public:
 };
 
 template<typename WSType>
-class WebSocketClientBase :public std::enable_shared_from_this<WebSocketClientBase<WSType>>{
+class WebSocketClientBase :public std::enable_shared_from_this<WebSocketClientBase<WSType>> {
 public:
 	WebSocketClientBase(int id, boost::asio::io_context& ioctx, const std::string& host, const std::string& port, WebSocketClientApi* api) :
 		id_(id), ioctx_(ioctx), resolver_{ ioctx_ }, host_(host), port_(port), api_(api)
@@ -67,10 +69,17 @@ public:
 	}
 
 	virtual void Reconnect() {
+		std::string msg = uri_ + " ready to Reconn";
+		api_->OnReconnect(msg);
 		if (!stop_) {
+			msg = uri_ + " has been stop,ready to close";
+			api_->OnReconnect(msg);
 			Close();
 		}
-		std::this_thread::sleep_for(std::chrono::seconds(3));
+		//std::this_thread::sleep_for(std::chrono::seconds(3));
+		std::this_thread::sleep_for(std::chrono::seconds(2));
+		msg = uri_ + " exec Reconning....";
+		api_->OnReconnect(msg);
 		Connect(uri_);
 	}
 
@@ -78,12 +87,12 @@ public:
 		pairs_ = pairs;
 		auto subdata = api_->GenerateSubscribeData(pairs);
 		ws_->async_write(boost::asio::buffer(subdata),
-			std::bind(&WebSocketClientBase::OnSendSubscribeData, 
+			std::bind(&WebSocketClientBase::OnSendSubscribeData,
 				this->shared_from_this(),
 				std::placeholders::_1,
 				std::placeholders::_2));
 	}
-	
+
 	void Unsubscribe(std::unordered_set<std::string> pairs) {
 		auto unsubdata = api_->GenerateUnsubscribeData(pairs);
 		ws_->async_write(boost::asio::buffer(unsubdata),
@@ -92,11 +101,11 @@ public:
 				std::placeholders::_1,
 				std::placeholders::_2));
 	}
-			
+
 	void StartRead() {
 		AsyncReadData();
 	}
-	
+
 	void Send(const std::string& data) {
 		ws_->async_write(boost::asio::buffer(data),
 			std::bind(&WebSocketClientBase::OnRead,
@@ -106,8 +115,8 @@ public:
 	}
 
 protected:
-	virtual void OnResolved(boost::beast::error_code ec, boost::asio::ip::tcp::resolver::results_type res) = 0; 
-	
+	virtual void OnResolved(boost::beast::error_code ec, boost::asio::ip::tcp::resolver::results_type res) = 0;
+
 	virtual void OnConnected(boost::beast::error_code ec) = 0;
 
 	void OnReady(boost::beast::error_code ec) {
@@ -116,11 +125,11 @@ protected:
 			Reconnect();
 			return;
 		}
-		printf("setup websocket connection to %s:%s succeeded\n", host_.c_str(), port_.c_str()); 
+		printf("setup websocket connection to %s:%s succeeded\n", host_.c_str(), port_.c_str());
 		api_->OnConnected(id_);
 		StartRead();
 	}
-	
+
 	void OnSendSubscribeData(boost::system::error_code ec, std::size_t bytes_transferred) {
 		if (ec) {
 			printf("fail to subsCribe data\n");
@@ -133,9 +142,9 @@ protected:
 		ws_->async_read(
 			buffer_,
 			std::bind(
-				&WebSocketClientBase::OnSubscribeRetMsg, 
-				this->shared_from_this(), 
-				std::placeholders::_1, 
+				&WebSocketClientBase::OnSubscribeRetMsg,
+				this->shared_from_this(),
+				std::placeholders::_1,
 				std::placeholders::_2));
 	}
 
@@ -161,10 +170,11 @@ protected:
 			total_len += data_size;
 		}
 		buffer_.consume(buffer_.size());
-		bool ok = api_ ->OnSubscribed(buf, total_len);
+		bool ok = api_->OnSubscribed(buf, total_len);
 		if (!ok) {
 			printf("process data failed\n");
-		}else{
+		}
+		else {
 			AsyncReadData();
 		}
 	}
@@ -218,7 +228,7 @@ protected:
 			;
 		}
 	}
-							
+
 	void AsyncReadData() {
 		ws_->async_read(buffer_, std::bind(&WebSocketClientBase::OnRead, this->shared_from_this(), std::placeholders::_1, std::placeholders::_2));
 	}
@@ -241,7 +251,7 @@ protected:
 		//char buf[size + 1] = { 0 };
 		//printf("%d,%d\n",(int)size,(int)recv_len);
 #ifdef _WIN32
-		char *buf = (char*)malloc(size + 1);
+		char* buf = (char*)malloc(size + 1);
 #else
 		char buf[size + 1] = { 0 };
 #endif
@@ -269,10 +279,10 @@ protected:
 		if (ec) {
 			printf("fail to close ws,%s\n", ec.message().c_str());
 		}
-
+		api_->OnClosed(uri_);
 		stop_ = true;
 	}
-	
+
 	template <typename Derived>
 	std::shared_ptr<Derived> shared_from_base()
 	{
@@ -282,13 +292,13 @@ protected:
 	int id_;
 	boost::asio::io_context& ioctx_;
 	boost::asio::ip::tcp::resolver resolver_;
-	std::shared_ptr<boost::beast::websocket::stream<WSType>>ws_; 
-	std::string host_; 
-	std::string port_; 
+	std::shared_ptr<boost::beast::websocket::stream<WSType>>ws_;
+	std::string host_;
+	std::string port_;
 	std::string uri_;
-	std::set<std::string> pairs_; 
+	std::set<std::string> pairs_;
 	WebSocketClientApi* api_;
-	boost::beast::multi_buffer buffer_; 
+	boost::beast::multi_buffer buffer_;
 	bool stop_ = true;
 };
 
@@ -357,12 +367,12 @@ private:
 			std::bind(&WebSocketSSLClient::OnSSLHandshake, shared_from_base<WebSocketSSLClient>(), std::placeholders::_1)
 		);
 	}
-	
+
 	void OnSSLHandshake(boost::beast::error_code ec) {
 		ws_->async_handshake(host_, uri_, std::bind(&WebSocketSSLClient::OnReady,
 			shared_from_base<WebSocketSSLClient>(), std::placeholders::_1));
 	}
-							
+
 private:
 	boost::asio::ssl::context ssl_;
 

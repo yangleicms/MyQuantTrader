@@ -34,12 +34,40 @@
 
 typedef std::function<int(Json::Value&)> CB;
 
-class single_con;
+class single_con
+{
+public:
+	static single_con* get_instance()
+	{
+		static single_con res;
+		return &res;
+	}
+
+	boost::asio::io_context m_ioc;
+	std::atomic<int> m_index;
+	std::atomic<int> m_work;
+	std::map<int, std::shared_ptr<WebSocketSSLClient>> m_dat;
+
+private:
+	single_con() { m_index = 0; m_work.store(0); }
+	~single_con() {}
+};
 
 class WSClient :public WebSocketClientApi
 {
 public:
-	virtual void OnConnected(int id) {};
+	virtual void OnConnected(int id) {
+		printf("OnConnected,id:%d\n", id);
+	};
+
+	virtual void OnClosed(std::string uri) {
+		std::string msg = uri + ":ws has closed";
+		printf("%s\n", msg.data());
+		
+	}
+	virtual void OnReconnect(std::string& msg) {
+		printf("%s\n", msg.data());
+	}
 
 	virtual bool OnSubscribed(char* data, size_t len) {
 		return true;
@@ -77,25 +105,6 @@ public:
 		return"";
 	}
 	CB cb;
-};
-
-class single_con
-{
-public:
-	static single_con* get_instance()
-	{
-		static single_con res;
-		return &res;
-	}
-
-	boost::asio::io_context m_ioc;
-	std::atomic<int> m_index;
-	std::atomic<int> m_work;
-	std::map<int, std::shared_ptr<WebSocketSSLClient>> m_dat;
-	
-private:
-	single_con() { m_index = 0; m_work.store(0);}
-	~single_con() {}
 };
 
 static int get_dur_from_ubiq_tradingday_begin()
