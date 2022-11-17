@@ -7,9 +7,9 @@
 std::string apiKey = "3KfwFsVzviMmXGbfZB8Zrb5d31D1McqhhBAjkhutqnK9j3amR2g2zQRcD6vYWUcQvB";
 std::string secrertKey = "I7yBFNDCZKGqmLoAXjCKTzknJAGAya0vf8qrWgAgxGyWRhCe6UOrtNImrvOG30AX";
 
-std::string ok_key = "df165e4b-14c4-48b1-b8a8-e74dbd59d9e1";
-std::string ok_sec = "219023BB201E1827E1196CE174E62FA1";
-std::string ok_pswd = "Asdf1234#";
+std::string ok_key = "2";
+std::string ok_sec = "8";
+std::string ok_pswd = "!";
 
 int cli_public_index = -1;
 int cli_private_index = -1;
@@ -109,7 +109,7 @@ int on_rtn_order_and_fill(Json::Value& jr)
 	return 0;
 }
 
-//Á¬½Ópionex ws·þÎñ²¢Æô¶¯±¾µØwscli
+//¿¿pionex ws¿¿¿¿¿¿¿wscli
 void connect_pionex_PubAndPrivate_ws(CB pub, CB pri, int& cli_public_index, int& cli_private_index)
 {
 	//connect pionex public ws
@@ -128,16 +128,16 @@ void work() {
 void test_pionex_order()
 {
 	PionexCPP::init(apiKey, secrertKey);
-	//Á¬½Ópionex ws·þÎñ²¢Æô¶¯±¾µØwscli
+	//¿¿pionex ws¿¿¿¿¿¿¿wscli
 
 	std::thread t1(work);
 	t1.detach();
 	std::this_thread::sleep_for(std::chrono::seconds(1));
-	//Í¨¹ý¹«ÓÐÁô¶©ÔÄÐÐÇé
+	//¿¿¿¿¿¿¿¿¿
 	//PionexCPP::sub_depth("ETH_USDT", cli_public_index);
-	//Í¨¹ýË½ÓÐÁô¶©ÔÄÖ¸¶¨ºÏÔ¼µÄÏÂµ¥ºÍ³É½»»Ø±¨
+	//¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿
 	PionexCPP::sub_order_ws("ETH_USDT", cli_private_index);
-	//²»ÒªÁ¬Ðø·¢ËÍ£¬»áµ¼ÖÂ±¨´í
+	//¿¿¿¿¿¿¿¿¿¿¿¿
 	std::this_thread::sleep_for(std::chrono::seconds(1));
 	PionexCPP::sub_fill_ws("ETH_USDT", cli_private_index);
 	std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -160,8 +160,8 @@ public:
 	~okex_api() {}
 
 	void okex_work() {
-		okex_pub = Webclient::connect(on_okex_depth, "/ws/v5/public", std::to_string(8443), "ws.okx.com", cli_public_index);
-		std::this_thread::sleep_for(std::chrono::seconds(1));
+		//okex_pub = Webclient::connect(on_okex_depth, "/ws/v5/public", std::to_string(8443), "ws.okx.com", cli_public_index);
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		okex_pri = Webclient::connect(on_okex_depth, "/ws/v5/private", std::to_string(8443),
 			"ws.okx.com", cli_public_index,std::bind(&okex_api::on_reconn,this));
 		Webclient::work();
@@ -185,17 +185,7 @@ public:
 		okex_pub->Send(jsonstr);
 	}
 
-	void on_reconn() {
-		std::cout << "OKEX private ws Reconn\n";
-	}
-
-	void test_okex_private() {
-		std::thread t1(std::bind(&okex_api::okex_work, this));
-		t1.detach();
-		std::this_thread::sleep_for(std::chrono::seconds(2));
-
-		return;
-
+	void auth() {
 		std::string tp = std::to_string(get_current_ms_epoch() / 1000);
 		std::string strr = tp + "GET/users/self/verify";
 
@@ -211,13 +201,11 @@ public:
 		std::string jsonstr = jsObj.toStyledString();
 		std::cout << jsonstr << std::endl;
 		okex_pri->Send(jsonstr);
+	}
 
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-		jsObj.clear();
-		sub.clear();
-		args.clear();
+	void sub_channel() {
+		Json::Value jsObj, sub, args;
 		jsObj["op"] = "subscribe";
-
 		sub["channel"] = "orders";
 		sub["instType"] = "SWAP";
 		sub["instId"] = "MATIC-USDT-SWAP";
@@ -228,15 +216,14 @@ public:
 		args.append(sub);
 
 		jsObj["args"] = args;
-		jsonstr = jsObj.toStyledString();
+		std::string jsonstr = jsObj.toStyledString();
 		std::cout << jsonstr << std::endl;
 		okex_pri->Send(jsonstr);
-
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-		jsObj.clear();
-		sub.clear();
-		args.clear();
-
+	}
+	
+	void send_ord()
+	{
+		Json::Value jsObj, sub, args;
 		jsObj["id"] = "1099";
 		jsObj["op"] = "order";
 
@@ -246,31 +233,51 @@ public:
 		sub["ordType"] = "limit";
 		sub["sz"] = "1";
 		sub["px"] = "0.936";
-		sub["clOrdId"] = "33334";
+		sub["clOrdId"] = "66666";
 
 		args.append(sub);
 		jsObj["args"] = args;
-		jsonstr = jsObj.toStyledString();
+		std::string jsonstr = jsObj.toStyledString();
 		std::cout << jsonstr << std::endl;
 		okex_pri->Send(jsonstr);
+	}
 
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-		jsObj.clear();
-		sub.clear();
-		args.clear();
-
+	void cancel_ord() {
+		Json::Value jsObj, sub, args;
 		jsObj["id"] = "1033";
 		jsObj["op"] = "cancel-order";
 
 		sub["instId"] = "MATIC-USDT-SWAP";
-		sub["clOrdId"] = "33334";
+		sub["clOrdId"] = "66666";
 
 		args.append(sub);
 		jsObj["args"] = args;
-		jsonstr = jsObj.toStyledString();
+		std::string jsonstr = jsObj.toStyledString();
 		std::cout << jsonstr << std::endl;
 		okex_pri->Send(jsonstr);
+	}
 
+	void on_reconn() {
+		std::cout << "OKEX private ws Reconn,login\n";
+		auth();
+		return;
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		std::cout << "OKEX sub\n";
+		sub_channel();
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		std::cout << "OKEX sendOrd\n";
+		send_ord();
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		std::cout << "OKEX cancelOrd\n";
+		cancel_ord();
+	}
+
+	void test_okex_private() {
+		std::thread t1(std::bind(&okex_api::okex_work, this));
+		t1.detach();
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+		auth();
+		return;
 	}
 };
 
@@ -288,4 +295,5 @@ int main(int argc, char* argv[])
 	}
 	return 0;
 }
+
 
