@@ -8,7 +8,8 @@ FILE(GLOB_RECURSE SOURCE_FILES main.cpp)
 ${PROJECT_SOURCE_DIR}/src
 ${PROJECT_SOURCE_DIR}/lib/libcurl-7.56.0/include
 ${PROJECT_SOURCE_DIR}/lib/mbedtls/include
-/home/ubuntu/mm/electronresearch/third/include/mbedtls/
+/home/ubuntu/mm/marketmaker/third/include/mbedtls/
+/home/ubuntu/mm/workflow/src/include/
 ${PROJECT_SOURCE_DIR}/lib/libwebsockets-2.4.0/include
 ${PROJECT_SOURCE_DIR}/lib/jsoncpp-1.8.3/include
   
@@ -22,7 +23,8 @@ ${PROJECT_BINARY_DIR}/lib
 ${PROJECT_SOURCE_DIR}/lib/third/linux/
 ${PROJECT_SOURCE_DIR}/lib/mbedtls/lib
 ${PROJECT_SOURCE_DIR}/lib/libwebsockets-2.4.0/lib
-/home/ubuntu/mm/electronresearch/third/lib/linux/
+/home/ubuntu/mm/marketmaker/third/lib/linux/
+/home/ubuntu/mm/workflow/_lib
 ${PROJECT_SOURCE_DIR}/lib/jsoncpp-1.8.3/lib
  )
 
@@ -40,5 +42,6 @@ TARGET_LINK_LIBRARIES(utest pthread)
 TARGET_LINK_LIBRARIES(utest dl)
 TARGET_LINK_LIBRARIES(utest ssl)
 TARGET_LINK_LIBRARIES(utest crypto)
+TARGET_LINK_LIBRARIES(utest workflow)
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 

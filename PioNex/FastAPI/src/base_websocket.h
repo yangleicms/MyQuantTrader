@@ -20,7 +20,10 @@
 #include <json/json.h>
 #include <curl/curl.h>
 #include <curl/easy.h>
+#include <workflow/HttpMessage.h>
+#include <workflow/WFTaskFactory.h>
 #include "WebSocketSSLClient.h"
+
 
 #define BINANCE_WS_HOST "stream.binance.com"
 #define BINANCE_WS_UB_HOST "fstream.binance.com"
@@ -144,6 +147,44 @@ static std::string Pionex_DoubletoString(double val,int prec)
 	out << val;
 	return out.str();
 }
+
+static int http_async(const std::string& url, std::map<std::string,std::string>& extra_http_header,
+		const std::string& body, const std::string& action, const std::string &keyinfo, std::function<void(const std::string&, const std::string&)> callback)
+{
+		auto task = WFTaskFactory::create_http_task(url, 0, 0, [callback,&keyinfo](WFHttpTask* t)
+		{
+				auto state = t->get_state();
+
+				if (state != WFT_STATE_SUCCESS)
+				{
+					callback("workThread Lib Http TaskError ", keyinfo);
+					if (state == CS_STATE_ERROR) {
+					}
+
+					return -1;
+				}
+				auto resp = t->get_resp();
+
+				const void* p;
+				size_t len;
+				resp->get_parsed_body(&p, &len);
+
+				std::string content(reinterpret_cast<const char*>(p), len);
+				callback(content,keyinfo);
+
+		});
+
+		auto req = task->get_req();
+		req->set_method(action);
+
+		req->append_output_body(body.data(), body.size());
+		for (auto it: extra_http_header) {
+			req->add_header_pair(it.first,it.second);
+		}
+		task->start();
+		return 0;
+}
+
 
 class SmartCURL
 {
