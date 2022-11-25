@@ -37,6 +37,63 @@ bool OkexCPP::parse_string2json(std::string& str_result, Json::Value& json_resul
 	return res;
 }
 
+void OkexCPP::send_order(const TBCryptoInputField* input, std::function<void(std::string&, std::string&)> callback)
+{
+	Json::Value sub;
+	if (input->Direction == 0)
+		sub["side"] = "buy";
+	else
+		sub["side"] = "sell";
+	sub["instId"] = input->InstrumentID;
+	if (input->CryptoType == 0) {
+		sub["tdMode"] = "cash";
+	}
+	else {
+		sub["tdMode"] = "cross";
+		sub["ccy"] = "USDT";
+	}
+
+	if (0 == input->PriceType)
+		sub["ordType"] = "limit";
+	else if (0 == input->PriceType)
+		sub["ordType"] = "market";
+	else if (1 == input->PriceType)
+		sub["ordType"] = "post_only";
+
+	if (0 == input->TimeCondition) {
+		if (0 == input->VolumeCondition)
+			sub["ordType"] = "fok";
+		else
+			sub["ordType"] = "ioc";
+	}
+
+	sub["clOrdId"] = std::to_string(input->key);
+	sub["sz"] = std::to_string(input->VolumeTotal);
+	if (strstr(input->InstrumentID, "SWAP") != NULL) {
+		sub["sz"] = std::to_string((int)(input->VolumeTotal + 0.5));
+	}
+	sub["px"] = std::to_string(input->LimitPrice);
+
+	std::string post_data = sub.toStyledString();
+
+	std::string tot_url(OKEX_HOST);
+	std::string url = "/api/v5/trade/order";
+	std::string action = "POST";
+
+	std::map <std::string,std::string> extra_http_header;
+	extra_http_header["OK-ACCESS-KEY"]= m_api_key;
+
+	std::string tp = get_utc_time();
+	extra_http_header["OK-ACCESS-TIMESTAMP"] = tp;
+
+	extra_http_header["OK-ACCESS-PASSPHRASE"] = m_pass;
+
+	std::string str_result;
+	tot_url += url;
+
+	http_async(tot_url, extra_http_header, post_data, action, std::to_string(input->key), callback);
+}
+
 void OkexCPP::get_pos() 
 {
 	std::string tot_url(OKEX_HOST);

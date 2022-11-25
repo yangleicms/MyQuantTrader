@@ -287,22 +287,46 @@ public:
 		cancel_ord();
 	}
 
+	void on_rsp_async_insert_order(std::string& res, std::string& keyinfo)
+	{
+		std::cout << "rcv res:" << res << std::endl;
+		std::cout << "rcv keyinfo:" << keyinfo << std::endl;
+	}
+
+	void send_test() 
+	{
+		TBCryptoInputField ins;
+		ins.key = 100;
+		ins.LimitPrice = 1000;
+
+		std::function<void(std::string&, std::string&)> callback =
+			std::bind(&okex_api::on_rsp_async_insert_order, this, std::placeholders::_1, std::placeholders::_2);
+
+		OkexCPP::send_order(&ins, callback);
+
+	}
+
 	void test_okex_private() {
 		std::thread t1(std::bind(&okex_api::okex_work, this));
 		t1.detach();
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 		auth();
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+		send_test();
 		return;
 	}
 };
 
 int main(int argc, char* argv[])
 {
-	pionex_api api;
-	api.test_pionex_order();
-	//api.test_okex_private();
+	//pionex_api api;
+	//api.test_pionex_order();
+	okex_api api;
+	OkexCPP::init(ok_key,ok_sec,ok_pswd);
+	api.test_okex_private();
 	//test_okex_private();
-	//OkexCPP::init(ok_key,ok_sec,ok_pswd);
 	//OkexCPP::get_pos();
 	//Json::Value res;
 	//OkexCPP::get_order(res,"MATIC-USDT-SWAP","","507602064474812435");
