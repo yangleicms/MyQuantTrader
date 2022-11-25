@@ -37,6 +37,33 @@
 
 typedef std::function<int(Json::Value&)> CB;
 
+static std::string get_workThread_status(int st) {
+	switch (st)
+	{
+	case -1:
+		return "WFT_STATE_UNDEFINED";
+	case CS_STATE_SUCCESS:
+		return "WFT_STATE_SUCCESS";
+	case CS_STATE_TOREPLY:
+		return "WFT_STATE_TOREPLY";
+	case CS_STATE_TOREPLY + 1:
+		return "WFT_STATE_NOREPLY";
+	case CS_STATE_ERROR:
+		return "WFT_STATE_SYS_ERROR";
+	case 65:
+		return "WFT_STATE_SSL_ERROR";
+	case 66:
+		return "WFT_STATE_DNS_ERROR";
+	case 67:
+		return "WFT_STATE_TASK_ERROR";
+	case CS_STATE_STOPPED:
+		return "WFT_STATE_ABORTED";
+	default:
+		return "WFT_UNKOWN";
+		break;
+	}
+}
+
 class single_con
 {
 public:
