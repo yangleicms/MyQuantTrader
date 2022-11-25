@@ -24,6 +24,8 @@
 #include <workflow/WFTaskFactory.h>
 #include "WebSocketSSLClient.h"
 
+#include "../factory/WFTaskFactory.h"
+#include "../include/workflow/HttpMessage.h"
 
 #define BINANCE_WS_HOST "stream.binance.com"
 #define BINANCE_WS_UB_HOST "fstream.binance.com"
@@ -178,19 +180,30 @@ static std::string Pionex_DoubletoString(double val,int prec)
 static int http_async(const std::string& url, std::map<std::string,std::string>& extra_http_header,
 		const std::string& body, const std::string& action, const std::string &keyinfo, std::function<void(std::string&, std::string&)> callback)
 {
-		auto task = WFTaskFactory::create_http_task(url, 0, 0, [callback,&keyinfo](WFHttpTask* t)
+		WFHttpTask* task = WFTaskFactory::create_http_task(url, 0, 0, [callback,&keyinfo](WFHttpTask* t)
 		{
 				auto state = t->get_state();
-
+				
 				if (state != WFT_STATE_SUCCESS)
 				{
-					std::string msg = "workThread Lib Http TaskError:" + get_workThread_status(state);
-					std::string info = keyinfo;
-					callback(msg, info);
-					if (state == CS_STATE_ERROR) {
+					if(state!=65){
+						std::string msg = "workThread Lib Http TaskError:" + get_workThread_status(state);
+						std::string info = keyinfo;
+						callback(msg, info);
+						return -1;
 					}
+					else {
+						auto resp = t->get_resp();
 
-					return -1;
+						const void* p;
+						size_t len;
+						resp->get_parsed_body(&p, &len);
+
+						std::string content(reinterpret_cast<const char*>(p), len);
+						std::string info = keyinfo;
+						callback(content, info);
+						return 0;
+					}
 				}
 				auto resp = t->get_resp();
 
@@ -205,9 +218,10 @@ static int http_async(const std::string& url, std::map<std::string,std::string>&
 		});
 
 		auto req = task->get_req();
+		
 		req->set_method(action);
 		req->append_output_body(body.data(), body.size());
-
+		
 		for (auto it: extra_http_header) {
 			req->add_header_pair(it.first,it.second);
 		}
