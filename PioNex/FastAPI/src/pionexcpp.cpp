@@ -212,10 +212,10 @@ void PionexCPP::send_order(const char* symbol, const char* side,
 	std::string post_data = jsObj.toStyledString();
 
 	std::map<std::string,std::string> extra_http_header;
-	string header_SIGNATURE("PIONEX-KEY:");
+	std::string header_SIGNATURE = "PIONEX-KEY";
 	extra_http_header[header_SIGNATURE] = m_api_key;
 
-	header_SIGNATURE = "PIONEX-SIGNATURE:";
+	header_SIGNATURE = "PIONEX-SIGNATURE";
 	string tot_str = action + url + post_data;
 	std::string signature = hmac_sha256(m_secret_key.c_str(), tot_str.c_str());
 	extra_http_header[header_SIGNATURE]  = signature;
