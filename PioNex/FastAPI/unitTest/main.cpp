@@ -310,10 +310,10 @@ public:
 		std::thread t1(std::bind(&okex_api::okex_work, this));
 		t1.detach();
 		std::this_thread::sleep_for(std::chrono::seconds(1));
-		auth();
-		std::this_thread::sleep_for(std::chrono::seconds(1));
+		//auth();
+		//std::this_thread::sleep_for(std::chrono::seconds(1));
 
-		std::this_thread::sleep_for(std::chrono::seconds(1));
+		//std::this_thread::sleep_for(std::chrono::seconds(1));
 		send_test();
 		return;
 	}
