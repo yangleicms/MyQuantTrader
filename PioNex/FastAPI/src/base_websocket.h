@@ -179,38 +179,6 @@ static std::string Pionex_DoubletoString(double val,int prec)
 	return out.str();
 }
 
-void diana_post_slack_req(const std::string& url, const std::string& body, std::function<void(const std::string&)> callback)
-{
-	auto task = WFTaskFactory::create_http_task(url, 0, 0, [callback](WFHttpTask* t)
-		{
-			auto state = t->get_state();
-
-			if (state != WFT_STATE_SUCCESS)
-			{
-				callback("http error");
-				return;
-			}
-			auto resp = t->get_resp();
-
-			const void* p;
-			size_t len;
-			resp->get_parsed_body(&p, &len);
-
-			std::string content(reinterpret_cast<const char*>(p), len);
-			callback(content);
-
-		});
-
-	auto req = task->get_req();
-	req->set_method("POST");
-
-	req->append_output_body(body.data(), body.size());
-
-	req->add_header_pair("Content-Type", "application/json");
-	//req->add_header_pair("Authorization", slack_token);
-	task->start();
-}
-
 static int http_async(const std::string& url, std::map<std::string,std::string>& extra_http_header,
 		const std::string& body, const std::string& action, const std::string &keyinfo, std::function<void(std::string&, std::string&)> callback)
 {
