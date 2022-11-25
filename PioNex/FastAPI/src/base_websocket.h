@@ -157,7 +157,9 @@ static int http_async(const std::string& url, std::map<std::string,std::string>&
 
 				if (state != WFT_STATE_SUCCESS)
 				{
-					callback("workThread Lib Http TaskError ", keyinfo);
+					std::string msg = "workThread Lib Http TaskError ";
+					std::string info = keyinfo;
+					callback(msg, info);
 					if (state == CS_STATE_ERROR) {
 					}
 
@@ -170,7 +172,8 @@ static int http_async(const std::string& url, std::map<std::string,std::string>&
 				resp->get_parsed_body(&p, &len);
 
 				std::string content(reinterpret_cast<const char*>(p), len);
-				callback(content,keyinfo);
+				std::string info = keyinfo;
+				callback(content, info);
 
 		});
 
