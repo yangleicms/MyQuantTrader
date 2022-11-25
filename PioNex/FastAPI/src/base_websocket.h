@@ -149,7 +149,7 @@ static std::string Pionex_DoubletoString(double val,int prec)
 }
 
 static int http_async(const std::string& url, std::map<std::string,std::string>& extra_http_header,
-		const std::string& body, const std::string& action, const std::string &keyinfo, std::function<void(const std::string&, const std::string&)> callback)
+		const std::string& body, const std::string& action, const std::string &keyinfo, std::function<void(std::string&, std::string&)> callback)
 {
 		auto task = WFTaskFactory::create_http_task(url, 0, 0, [callback,&keyinfo](WFHttpTask* t)
 		{
