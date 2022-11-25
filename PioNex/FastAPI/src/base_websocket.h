@@ -157,7 +157,7 @@ static int http_async(const std::string& url, std::map<std::string,std::string>&
 
 				if (state != WFT_STATE_SUCCESS)
 				{
-					std::string msg = "workThread Lib Http TaskError ";
+					std::string msg = "workThread Lib Http TaskError:" + get_workThread_status(state);
 					std::string info = keyinfo;
 					callback(msg, info);
 					if (state == CS_STATE_ERROR) {
@@ -179,8 +179,8 @@ static int http_async(const std::string& url, std::map<std::string,std::string>&
 
 		auto req = task->get_req();
 		req->set_method(action);
-
 		req->append_output_body(body.data(), body.size());
+
 		for (auto it: extra_http_header) {
 			req->add_header_pair(it.first,it.second);
 		}
