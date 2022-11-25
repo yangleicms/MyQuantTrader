@@ -23,9 +23,9 @@
 #include <workflow/HttpMessage.h>
 #include <workflow/WFTaskFactory.h>
 
-#include "../factory/HttpTaskImpl.cc"
-#include "../factory/WFTaskFactory.h"
-#include "../include/workflow/HttpMessage.h"
+//#include "../factory/HttpTaskImpl.cc"
+//#include "../factory/WFTaskFactory.h"
+//#include "../include/workflow/HttpMessage.h"
 
 #include "WebSocketSSLClient.h"
 
