@@ -58,6 +58,10 @@ public:
 		const char *type, const char* clientOrderId, double size,
 		double price, double amount, bool IOC, Json::Value &json_result);
 
+	static void send_order(const char* symbol, const char* side,
+		const char* type, const char* clientOrderId, double size,
+		double price, double amount, bool IOC, std::function<void(std::string&, std::string&)> callback);
+
 	static void cancel_order(const char *symbol,uint64_t orderId,Json::Value &json_result);
 	static void get_order(const char *symbol,uint64_t orderId, Json::Value &json_result);//orderID
 	static void get_order(const char *symbol, const char* localOrderId, Json::Value &json_result);//localID

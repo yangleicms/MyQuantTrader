@@ -167,6 +167,65 @@ void PionexCPP::send_order(const char *symbol, const char *side,
 	BinaCPP_logger::write_log("<PionexCPP::send_order:%s> Done.\n", symbol);
 }
 
+void PionexCPP::send_order(const char* symbol, const char* side,
+	const char* type, const char* clientOrderId, double size,
+	double price, double amount, bool IOC, std::function<void(std::string&, std::string&)> callback)
+{
+	if (m_api_key.size() == 0 || m_secret_key.size() == 0) {
+		BinaCPP_logger::write_log("<PionexCPP::send_order> API Key and Secret Key has not been set.");
+		return;
+	}
+
+	std::string tot_url(PIONEX_HOST);
+	std::string url = "/api/v1/trade/order?";
+	std::string action = "POST";
+
+	std::string tp = std::to_string(pionex_get_current_ms_epoch());
+	std::string pre_data = std::string("timestamp=") + tp;
+	url += pre_data;
+	//std::string signature = get_pionex_trding_key(m_secret_key.c_str(), pre_data.c_str());
+
+	Json::Value jsObj;
+	jsObj["symbol"] = symbol;
+	jsObj["side"] = side;
+	jsObj["type"] = type;
+
+	if (strcmp(type, "MARKET") != 0)
+	{
+		dec::decimal<4> qty(size);
+		jsObj["size"] = dec::toString(qty);
+		dec::decimal<4> value(price);
+		std::string sValue = dec::toString(value);
+		jsObj["price"] = sValue;
+	}
+	else
+	{
+		jsObj["amount"] = amount;
+	}
+	if (clientOrderId != nullptr)
+	{
+		jsObj["clientOrderId"] = clientOrderId;
+	}
+	if (IOC) {
+		jsObj["IOC"] = true;
+	}
+	std::string post_data = jsObj.toStyledString();
+
+	std::map<std::string,std::string> extra_http_header;
+	string header_SIGNATURE("PIONEX-KEY:");
+	extra_http_header[header_SIGNATURE] = m_api_key;
+
+	header_SIGNATURE = "PIONEX-SIGNATURE:";
+	string tot_str = action + url + post_data;
+	std::string signature = hmac_sha256(m_secret_key.c_str(), tot_str.c_str());
+	extra_http_header[header_SIGNATURE]  = signature;
+
+	std::string str_result;
+	tot_url += url;
+
+	http_async(tot_url, extra_http_header, post_data, action, std::string(clientOrderId), callback);
+}
+
 void PionexCPP::cancel_order(const char *symbol,uint64_t orderId,Json::Value &json_result)
 {
 	if (m_api_key.size() == 0 || m_secret_key.size() == 0) {

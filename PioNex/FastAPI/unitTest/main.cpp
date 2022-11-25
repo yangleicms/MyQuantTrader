@@ -14,135 +14,152 @@ std::string ok_pswd = "!";
 int cli_public_index = -1;
 int cli_private_index = -1;
 
-void test_trade()
+
+class pionex_api 
 {
-	Json::Value jr;
-	std::string localID = std::to_string(pionex_get_current_ms_epoch());
-	/*std::string localID = "1765885567201";
-	std::string localID1 = "1765885567203";*/
+public:
+	pionex_api() {}
+	~pionex_api() {}
 
-	PionexCPP::send_order("ETH_USDT", "SELL", "LIMIT", localID.data(), 0.01, 1350, 0, false, jr);
-
-	uint64_t ordID = jr["data"]["orderId"].asInt64();
-	//std::cout<<ordID<<"-"<<jr["data"]["orderId"].asString()<<std::endl;
-	//std::string strID = jr["data"]["orderId"].asString();
-
-	//uint64_t ordID = 11020405198194958;
-	std::cout << "get localord:" << localID << std::endl;
-	PionexCPP::get_order("ETH_USDT", localID.data(), jr);
-
-	std::cout << "get sysord:" << ordID << std::endl;
-	PionexCPP::get_order("ETH_USDT", ordID, jr);
-
-	std::cout << "cancel order:" << ordID << std::endl;
-	PionexCPP::cancel_order("ETH_USDT", ordID, jr);
-}
-
-int on_rtn_depth(Json::Value &jr) 
-{
-	if (false == jr["topic"].empty()) {
-		std::string topic = jr["topic"].asString();
-		std::cout << "topic:" << topic << std::endl;
-		std::cout << jr["symbol"].asString() << std::endl;
-		if (topic == "DEPTH") {
-			std::cout << jr["data"]["bids"][0][0].asString() << std::endl;
-			std::cout << jr["data"]["asks"][0][0].asString() << std::endl;
-		}
+	void on_rsp_async_insert_order(std::string& res, std::string &keyinfo)
+	{
+		std::cout << "rcv res:" << res << std::endl;
+		std::cout << "rcv keyinfo:" << keyinfo << std::endl;
 	}
-	else if (false == jr["op"].empty()) {
-		std::string op = jr["op"].asString();
-		if (op == "PING") {
-			auto pub_cli = Webclient::get_cli(cli_public_index);
-			Json::Value jsObj;
-			jsObj["op"] = "PONG";
-			jsObj["timestamp"] = pionex_get_current_ms_epoch();
-			std::string jsonstr = jsObj.toStyledString();
-			pub_cli->Send(jsonstr);
-		}
-	}
-	return 0;
-}
 
-int on_rtn_order_and_fill(Json::Value& jr)
-{
-	if (false == jr["op"].empty()) {
-		std::string op = jr["op"].asString();
-		if (op == "PING") {
-			auto pri_cli = Webclient::get_cli(cli_private_index);
-			Json::Value jsObj;
-			jsObj["op"] = "PONG";
-			jsObj["timestamp"] = pionex_get_current_ms_epoch();
-			std::string jsonstr = jsObj.toStyledString();
-			pri_cli->Send(jsonstr);
-		}
+	void test_trade()
+	{
+		Json::Value jr;
+		std::string localID = std::to_string(pionex_get_current_ms_epoch());
+		/*std::string localID = "1765885567201";
+		std::string localID1 = "1765885567203";*/
+
+		std::function<void(std::string&, std::string&)> callback =
+			std::bind(&pionex_api::on_rsp_async_insert_order, this, std::placeholders::_1, std::placeholders::_2);
+
+		PionexCPP::send_order("ETH_USDT", "SELL", "LIMIT", localID.data(), 
+			0.01, 1000, 0, false,callback);
+
+		return;
+
+		uint64_t ordID = jr["data"]["orderId"].asInt64();
+
+		std::cout << "get localord:" << localID << std::endl;
+		PionexCPP::get_order("ETH_USDT", localID.data(), jr);
+
+		std::cout << "get sysord:" << ordID << std::endl;
+		PionexCPP::get_order("ETH_USDT", ordID, jr);
+
+		std::cout << "cancel order:" << ordID << std::endl;
+		PionexCPP::cancel_order("ETH_USDT", ordID, jr);
 	}
-	else if (false == jr["type"].empty()) {
+
+	int on_rtn_depth(Json::Value& jr)
+	{
+		if (false == jr["topic"].empty()) {
+			std::string topic = jr["topic"].asString();
+			std::cout << "topic:" << topic << std::endl;
+			std::cout << jr["symbol"].asString() << std::endl;
+			if (topic == "DEPTH") {
+				std::cout << jr["data"]["bids"][0][0].asString() << std::endl;
+				std::cout << jr["data"]["asks"][0][0].asString() << std::endl;
+			}
+		}
+		else if (false == jr["op"].empty()) {
+			std::string op = jr["op"].asString();
+			if (op == "PING") {
+				auto pub_cli = Webclient::get_cli(cli_public_index);
+				Json::Value jsObj;
+				jsObj["op"] = "PONG";
+				jsObj["timestamp"] = pionex_get_current_ms_epoch();
+				std::string jsonstr = jsObj.toStyledString();
+				pub_cli->Send(jsonstr);
+			}
+		}
 		return 0;
 	}
-	else if (false == jr["topic"].empty())
+
+	int on_rtn_order_and_fill(Json::Value& jr)
 	{
-		std::string topic = jr["topic"].asString();
-		//order rtn
-		if (topic == "ORDER") {
-			std::cout << "this is a orderRtn event\n";
-			std::cout << "topic:" << topic << std::endl;
-			std::cout << jr["symbol"].asString() << std::endl;
-			std::cout << "orderId:" << jr["data"]["orderId"].asInt64() << std::endl;
-			std::cout << "clientOrderId:" << jr["data"]["clientOrderId"].asString() << std::endl;
-			std::cout << "price:" << jr["data"]["price"].asString() << std::endl;
-			std::cout << "size:" << jr["data"]["size"].asString() << std::endl;
-			std::cout << "filledSize:" << jr["data"]["filledSize"].asString() << std::endl;
-			std::cout << "status:" << jr["data"]["status"].asString() << std::endl;
+		if (false == jr["op"].empty()) {
+			std::string op = jr["op"].asString();
+			if (op == "PING") {
+				auto pri_cli = Webclient::get_cli(cli_private_index);
+				Json::Value jsObj;
+				jsObj["op"] = "PONG";
+				jsObj["timestamp"] = pionex_get_current_ms_epoch();
+				std::string jsonstr = jsObj.toStyledString();
+				pri_cli->Send(jsonstr);
+			}
 		}
-		else if (topic == "FILL") {
-			std::cout << "this is a FILL event\n";
-			std::cout << "topic:" << topic << std::endl;
-			std::cout << jr["symbol"].asString() << std::endl;
-			std::cout << "orderId:" << jr["data"]["orderId"].asInt64() << std::endl;
-			std::cout << "id:" << jr["data"]["id"].asInt64() << std::endl;
-			std::cout << "role:" << jr["data"]["role"].asString() << std::endl;
-			std::cout << "size:" << jr["data"]["size"].asString() << std::endl;
-			std::cout << "price:" << jr["data"]["price"].asString() << std::endl;
-			std::cout << "side:" << jr["data"]["side"].asString() << std::endl;
+		else if (false == jr["type"].empty()) {
+			return 0;
 		}
+		else if (false == jr["topic"].empty())
+		{
+			std::string topic = jr["topic"].asString();
+			//order rtn
+			if (topic == "ORDER") {
+				std::cout << "this is a orderRtn event\n";
+				std::cout << "topic:" << topic << std::endl;
+				std::cout << jr["symbol"].asString() << std::endl;
+				std::cout << "orderId:" << jr["data"]["orderId"].asInt64() << std::endl;
+				std::cout << "clientOrderId:" << jr["data"]["clientOrderId"].asString() << std::endl;
+				std::cout << "price:" << jr["data"]["price"].asString() << std::endl;
+				std::cout << "size:" << jr["data"]["size"].asString() << std::endl;
+				std::cout << "filledSize:" << jr["data"]["filledSize"].asString() << std::endl;
+				std::cout << "status:" << jr["data"]["status"].asString() << std::endl;
+			}
+			else if (topic == "FILL") {
+				std::cout << "this is a FILL event\n";
+				std::cout << "topic:" << topic << std::endl;
+				std::cout << jr["symbol"].asString() << std::endl;
+				std::cout << "orderId:" << jr["data"]["orderId"].asInt64() << std::endl;
+				std::cout << "id:" << jr["data"]["id"].asInt64() << std::endl;
+				std::cout << "role:" << jr["data"]["role"].asString() << std::endl;
+				std::cout << "size:" << jr["data"]["size"].asString() << std::endl;
+				std::cout << "price:" << jr["data"]["price"].asString() << std::endl;
+				std::cout << "side:" << jr["data"]["side"].asString() << std::endl;
+			}
+		}
+		return 0;
 	}
-	return 0;
-}
 
-//¿¿pionex ws¿¿¿¿¿¿¿wscli
-void connect_pionex_PubAndPrivate_ws(CB pub, CB pri, int& cli_public_index, int& cli_private_index)
-{
-	//connect pionex public ws
-	auto pub_cli = Webclient::connect(pub, "/wsPub", std::to_string(WS_PORT), PIONEX_WS, cli_public_index);
-	//connect pionex private ws
-	std::string path = PionexCPP::get_pionex_private_url();
-	auto pri_cli = Webclient::connect(pri, path.data(), std::to_string(WS_PORT), PIONEX_WS, cli_private_index);
-	//start boost ioc srv
-	Webclient::work();
-}
-
-void work() {
-	connect_pionex_PubAndPrivate_ws(on_rtn_depth, on_rtn_order_and_fill, cli_public_index, cli_private_index);
-}
-
-void test_pionex_order()
-{
-	PionexCPP::init(apiKey, secrertKey);
 	//¿¿pionex ws¿¿¿¿¿¿¿wscli
+	void connect_pionex_PubAndPrivate_ws(CB pub, CB pri, int& cli_public_index, int& cli_private_index)
+	{
+		//connect pionex public ws
+		auto pub_cli = Webclient::connect(pub, "/wsPub", std::to_string(WS_PORT), PIONEX_WS, cli_public_index);
+		//connect pionex private ws
+		std::string path = PionexCPP::get_pionex_private_url();
+		auto pri_cli = Webclient::connect(pri, path.data(), std::to_string(WS_PORT), PIONEX_WS, cli_private_index);
+		//start boost ioc srv
+		Webclient::work();
+	}
 
-	std::thread t1(work);
-	t1.detach();
-	std::this_thread::sleep_for(std::chrono::seconds(1));
-	//¿¿¿¿¿¿¿¿¿
-	//PionexCPP::sub_depth("ETH_USDT", cli_public_index);
-	//¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿
-	PionexCPP::sub_order_ws("ETH_USDT", cli_private_index);
-	//¿¿¿¿¿¿¿¿¿¿¿¿
-	std::this_thread::sleep_for(std::chrono::seconds(1));
-	PionexCPP::sub_fill_ws("ETH_USDT", cli_private_index);
-	std::this_thread::sleep_for(std::chrono::seconds(1));
-	test_trade();
-}
+	void work() {
+		connect_pionex_PubAndPrivate_ws(std::bind(&pionex_api::on_rtn_depth,this,std::placeholders::_1), std::bind(&pionex_api::on_rtn_order_and_fill,this, std::placeholders::_1),
+			cli_public_index, cli_private_index);
+	}
+
+	void test_pionex_order()
+	{
+		PionexCPP::init(apiKey, secrertKey);
+		//¿¿pionex ws¿¿¿¿¿¿¿wscli
+
+		std::thread t1(std::bind(&pionex_api::work,this));
+		t1.detach();
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+
+		//PionexCPP::sub_depth("ETH_USDT", cli_public_index);
+
+		PionexCPP::sub_order_ws("ETH_USDT", cli_private_index);
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+		PionexCPP::sub_fill_ws("ETH_USDT", cli_private_index);
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+		test_trade();
+	}
+};
 
 std::shared_ptr<WebSocketSSLClient> okex_pub;
 std::shared_ptr<WebSocketSSLClient> okex_pri;
@@ -150,8 +167,6 @@ std::shared_ptr<WebSocketSSLClient> okex_pri;
 int on_okex_depth(Json::Value& jr) {
 	return 0;
 }
-
-
 
 class okex_api 
 {
@@ -283,8 +298,9 @@ public:
 
 int main(int argc, char* argv[])
 {
-	okex_api api;
-	api.test_okex_private();
+	pionex_api api;
+	api.test_pionex_order();
+	//api.test_okex_private();
 	//test_okex_private();
 	//OkexCPP::init(ok_key,ok_sec,ok_pswd);
 	//OkexCPP::get_pos();
